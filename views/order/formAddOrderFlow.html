@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.0</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    {{template "header.html" .}}
+</head>
+
+<body>
+<div class="x-body">
+    <form class="layui-form" id="form-menu-add" action="{{urlfor "SysMenuController.AddSysMenu"}}">
+
+        <div class="layui-form-item">
+            <label for="MenuName" class="layui-form-label">
+                上传文件
+            </label>
+            <div class="layui-input-inline">
+                <button type="button" class="layui-btn layui-bg-orange" id="order_flow_csv"><i class="layui-icon"></i>选择文件...</button>
+            </div>
+        </div>
+
+    </form>
+</div>
+<script>
+    layui.use('upload', function(){
+        var $ = layui.jquery
+                ,upload = layui.upload;
+
+        upload.render({ //允许上传的文件后缀
+            elem: '#order_flow_csv'
+            ,url: "{{urlfor "OrderController.UploadOrderFlow"}}"
+            ,accept: 'file' //普通文件
+            ,exts: 'zip|rar|7z|csv' //只允许上传压缩文件
+            ,field:'filename'
+            ,before: function (obj) {
+                var loading = layer.load();
+            }
+            ,done: function(res){
+                console.log(res)
+                layer.close(loading)
+            }
+        });
+
+    });
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.0</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    {{template "header.html" .}}
+</head>
+
+<body>
+<div class="x-body">
+    <form class="layui-form" id="form-menu-add" action="{{urlfor "SysMenuController.SaveSysMenu"}}">
+
+        <div class="layui-form-item">
+            <label for="MenuName" class="layui-form-label">
+                <span class="x-red">*</span>菜单名字
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="MenuName" name="MenuName" value="{{.MenuRow.MenuName}}" required="required" lay-verify="MenuName" autocomplete="off" class="layui-input" width="500px">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label for="MenuRootid" class="layui-form-label">
+                上级菜单
+            </label>
+            <div class="layui-input-inline">
+                <select id="MenuRootid" name="MenuRootid" class="valid">
+                    <option value="0">请选择...</option>
+                    {{range $key,$value := .MenuList}}
+                        {{if eq $value.MenuLevel 1}}
+                           <option value="{{$value.Id}}" {{if eq $.MenuRow.MenuRootid $value.Id}} selected="selected" {{end}} >{{$value.MenuName}}</option>
+                        {{else}}
+                           <option value="{{$value.Id}}" {{if eq $.MenuRow.MenuRootid $value.Id}} selected="selected" {{end}} >&nbsp;&nbsp;&nbsp;&nbsp;
+                               ├{{$value.MenuName}}</option>
+                        {{end}}
+                    {{end}}
+                </select>
+            </div>
+
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+        <div class="layui-form-item">
+            <label for="MenuUrl" class="layui-form-label">
+                菜单地址
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="MenuUrl" name="MenuUrl" required="" lay-verify=""
+                       autocomplete="off" class="layui-input" value="{{$.MenuRow.MenuUrl}}" placeholder="">
+            </div>
+            <div class="layui-form-mid layui-word-aux">例: SysMenuController.ListSysMenu</div>
+        </div>
+
+        <div class="layui-form-item">
+            <label for="MenuLevel" class="layui-form-label">
+                菜单层级
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="MenuLevel" name="MenuLevel" required="" lay-verify=""
+                       autocomplete="off" class="layui-input" value="{{$.MenuRow.MenuLevel}}" placeholder="">
+            </div>
+            <div class="layui-form-mid layui-word-aux"></div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label for="MenuIcon" class="layui-form-label">
+                菜单图标
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="MenuIcon" name="MenuIcon" required="" lay-verify=""
+                       autocomplete="off" class="layui-input" value="{{$.MenuRow.MenuIcon}}">
+            </div>
+            <div class="layui-form-mid layui-word-aux">顶级菜单图标</div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label for="MenuFuncs" class="layui-form-label">
+                菜单方法
+            </label>
+            <div class="layui-input-block">
+                <textarea placeholder="格式为Json" rows="15" id="MenuFuncs" name="MenuFuncs" class="layui-textarea">{{$.MenuRow.MenuFuncs}}</textarea>
+                <pre class="layui-code">
+[
+  {
+    "func_id": 1,
+    "func_name": "GetSysRoleListByPage",
+    "func_desc": "菜单列表"
+  }
+]
+            </pre>
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label" for="MenuStatus">
+                菜单状态
+            </label>
+            <div class="layui-input-inline layui-form-checkbox" style="border: 0px;padding-top: 3px;">
+                <input type="checkbox" name="MenuStatus" id="MenuStatus" lay-skin="switch" lay-text="ON|OFF"
+                {{if eq $.MenuRow.MenuStatus  1}}
+                 checked="checked"
+                {{end}}
+                 value="{{$.MenuRow.MenuStatus}}" lay-filter="MenuStatus"
+                >
+                <div class="layui-unselect layui-form-switch" lay-skin="_switch"><em>OFF</em><i></i></div>
+            </div>
+        </div>
+
+        <input type="hidden" value="{{$.MenuRow.Id}}" id="Id" name="Id">
+
+        <div class="layui-form-item">
+            <label for="L_repass" class="layui-form-label">
+            </label>
+            <button  class="layui-btn" lay-filter="add" lay-submit="">
+                提交
+            </button>
+        </div>
+
+</form>
+</div>
+<script>
+    layui.use(['form','layer'], function(){
+        $ = layui.jquery;
+        var form = layui.form,layer = layui.layer;
+
+        //自定义验证规则
+        form.verify({
+            MenuName: function(value){
+                if(value.length < 4){
+                    return '菜单至少得4个字符啊';
+                }
+            }
+        });
+
+        //监听提交
+        form.on('submit(add)', function(data){
+            $.ajax({
+                url: $("#form-menu-add").attr('action'),
+                data: $("#form-menu-add").serialize(),
+                type: "post",
+                dataType: "json",
+                success: function (data) {
+
+                    var messge = "网络繁忙...";
+
+                    if(data.Message) {
+                        messge = data.Message;
+                    }
+
+                    layer.alert(messge, {icon: 6,time: 5000},function () {
+                        // 获得frame索引
+                        window.parent.location.reload();
+                        var index = parent.layer.getFrameIndex(window.name);
+                        //关闭当前frame
+                        parent.layer.close(index);
+                    });
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    layer.alert(messge, {icon: 6},function () {
+                        // 获得frame索引
+                        var index = parent.layer.getFrameIndex(window.name);
+                        //关闭当前frame
+                        parent.layer.close(index);
+                    });
+                },
+                beforeSend: function () {
+                },
+                complete: function () {
+                }
+            });
+
+            return false;
+        });
+
+        form.on('switch(MenuStatus)', function(data){
+            // console.log(data.elem); //得到checkbox原始DOM对象
+            //console.log(data.elem.checked); //开关是否开启，true或者false
+            // console.log(data.value); //开关value值，也可以通过data.elem.value得到
+            // console.log(data.othis); //得到美化后的DOM对象
+
+            if (data.elem.checked){
+                data.elem.value = 1
+            } else {
+                data.elem.value = 0
+            }
+        });
+    });
+
+    $(document).ready(function(){
+        //var text = $("#MenuFuncs").val();
+        //var result = JSON.stringify(JSON.parse(text), null, 2);//将字符串转换成json对象
+        //$("#MenuFuncs").val(result);
+    });
+</script>
+
+</body>
+
+</html>

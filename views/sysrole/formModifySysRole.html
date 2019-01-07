@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>欢迎页面-X-admin2.0</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    {{template "header.html" .}}
+</head>
+
+<body>
+<div class="x-body">
+    <form id="form-role-add" action="{{urlfor "SysRoleController.SaveSysRole"}}" method="post" class="layui-form layui-form-pane">
+
+        <div class="layui-form-item">
+            <label for="RoleName" class="layui-form-label">
+                <span class="x-red">*</span>角色名
+            </label>
+            <div class="layui-input-inline">
+                <input type="text" id="RoleName" name="RoleName" required="" lay-verify="required|RoleName"
+                       autocomplete="off" class="layui-input" value="{{.RoleRow.RoleName}}">
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">
+                拥有权限
+            </label>
+            <table  class="layui-table layui-input-block">
+                <tbody>
+
+                {{range $key,$value := .MenuList}}
+                {{if eq $value.MenuLevel 1}}
+
+                <tr>
+                    <td>
+                        <input type="checkbox" value="{{$value.Id}}" lay-skin="primary" title="{{$value.MenuName}}"
+                        {{range $k,$v := $.PowerList}}
+                            {{if eq $v.MenuId $value.Id}}
+                                checked="checked"
+                            {{end}}
+                        {{end}}
+                        >
+                    </td>
+                    <td>
+
+                    </td>
+                </tr>
+
+                {{else}}
+
+                <tr>
+                    <td>
+                        &nbsp;&nbsp;&nbsp;&nbsp;├
+                        <input lay-skin="primary" type="checkbox" value="{{$value.Id}}" title="{{$value.MenuName}}"
+                        {{range $k,$v := $.PowerList}}
+                        {{if eq $v.MenuId $value.Id}}
+                               checked="checked"
+                        {{end}}
+                        {{end}}
+                        >
+                    </td>
+                    <td>
+                        <div class="layui-input-block">
+                        {{range $k,$v := $value.FuncsInfo}}
+                            <input lay-skin="primary" type="checkbox" value="{{$value.Id}}-{{$v.FuncId}}" title="{{$v.FuncDesc}}"
+                            {{range $kk,$vv := $.PowerList}}
+                                {{if eq $vv.MenuId $value.Id}}
+                                {{if eq $vv.ActionId $v.FuncId}}
+                                       checked="checked"
+                                {{end}}
+                                {{end}}
+                            {{end}}
+                            >
+                        {{end}}
+                        </div>
+                    </td>
+                </tr>
+
+                {{end}}
+                {{end}}
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label for="Intro" class="layui-form-label">
+                描述
+            </label>
+            <div class="layui-input-block">
+                <textarea placeholder="请输入内容" id="Intro" name="Intro" class="layui-textarea">{{.RoleRow.Intro}}</textarea>
+            </div>
+        </div>
+
+        <div class="layui-form-item" pane="">
+            <label class="layui-form-label">角色状态</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="RoleStatus" id="RoleStatus" lay-skin="switch" lay-text="ON|OFF" value="{{.RoleRow.RoleStatus}}" lay-filter="RoleStatus"
+                {{if eq .RoleRow.RoleStatus  1}}
+                       checked="checked"
+                {{end}}
+                >
+                <div class="layui-unselect layui-form-switch" lay-skin="_switch"><em>OFF</em><i></i></div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <input type="hidden" id="RoleId" value="{{.RoleRow.Id}}">
+            <button class="layui-btn" lay-submit="" lay-filter="add">提交</button>
+        </div>
+
+    </form>
+</div>
+<script>
+    layui.use(['form','layer'], function(){
+        $ = layui.jquery;
+        var form = layui.form,layer = layui.layer;
+
+        form.verify({
+            RoleName: function(value){
+                if(value.length <= 3){
+                    return '名称低于3个字符';
+                }
+            }
+        });
+
+        form.on('submit(add)', function(data){
+            //var json = [];
+            var str = '';
+            $(":checkbox:checked").each(function () {
+                var current = $(this).val();
+                //var row  = {};
+                //arr = current.split("-");
+                //console.log(arr);
+                //row.MeunId = parseInt(arr[0]);
+                //row.ActionId = parseInt(arr[1]) ? parseInt(arr[1]) : parseInt("0");
+                //json.push(row);
+
+                str += current + ",";
+            });
+
+            str = str.substring(0,str.length);
+
+            //var jsonStr = JSON.stringify(json);
+            //console.log(jsonStr);
+            $.ajax({
+                url: $("#form-role-add").attr('action'),
+                data: {"RoleId":$("#RoleId").val(),"RoleName":$("#RoleName").val(), "RoleStatus":$("#RoleStatus").val(),"Intro":$("#Intro").val(),"MenuMap":str},
+                type: "post",
+                dataType: "json",
+                success: function (data) {
+
+                    var messge = "网络繁忙...";
+
+                    if(data.Message) {
+                        messge = data.Message;
+                    }
+
+                    layer.alert(messge, {icon: 6,time: 5000},function () {
+                        // 获得frame索引
+                        window.parent.location.reload();
+                        var index = parent.layer.getFrameIndex(window.name);
+                        //关闭当前frame
+                        parent.layer.close(index);
+                    });
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    layer.alert(messge, {icon: 6},function () {
+                        // 获得frame索引
+                        var index = parent.layer.getFrameIndex(window.name);
+                        //关闭当前frame
+                        parent.layer.close(index);
+                    });
+                },
+                beforeSend: function () {
+                },
+                complete: function () {
+                }
+            });
+
+            return false;
+        });
+
+        form.on('switch(RoleStatus)', function(data){
+            if (data.elem.checked){
+                data.elem.value = 1
+            } else {
+                data.elem.value = 0
+            }
+        });
+    });
+</script>
+
+</body>
+
+</html>
