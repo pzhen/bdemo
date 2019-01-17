@@ -14,4 +14,5 @@
 
 3.配置sql.(在doc目录)
 
-4.bee run bdemo 就可以访问了.
+4.bee run bdemo 就可以访问了.(http://127.0.0.1:8082/sys_user/login_form)
+账号密码 abc123/abc123
