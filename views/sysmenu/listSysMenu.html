@@ -49,6 +49,7 @@
             </th>
             <th width="20">ID</th>
             <th width="20">FID</th>
+            <th width="30">图表</th>
             <th width="100">菜单名称</th>
             <th width="180">URL</th>
             <th width="20">Level</th>
@@ -67,6 +68,7 @@
                     </td>
                     <td>{{$value.Id}}</td>
                     <td>{{$value.MenuRootid}}</td>
+                    <td><i class="iconfont">{{str2html $value.MenuIcon}}</i></td>
                     <td>
 
                         {{if eq $value.MenuLevel 1}}

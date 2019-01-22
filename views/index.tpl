@@ -86,6 +86,8 @@
       <a href="http://{{.Website}}">{{.Website}}</a> /
       Contact me:
       <a class="email" href="mailto:{{.Email}}">{{.Email}}</a>
+      Admin:
+      <a class="email" href="http://127.0.0.1:8082/sys_user/login_form">login</a>
     </div>
   </footer>
   <div class="backdrop"></div>
