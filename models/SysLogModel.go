@@ -17,10 +17,6 @@ type SysLog struct {
 	CreateTime uint   `orm:"column(create_time); description:"操作时间"`
 }
 
-func (t *SysLog) TableName() string {
-	return "sys_log"
-}
-
 func init() {
 	orm.RegisterModel(new(SysLog))
 }

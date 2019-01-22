@@ -32,14 +32,11 @@ type SysRoleMenuMap struct {
 	ActionId int `orm:"column(action_id);size(255);null" description:"操作权限"`
 }
 
-func (t *SysRole) TableName() string {
-	return "sys_role"
-}
-
 func init() {
 	orm.RegisterModel(new(SysRole), new(SysRoleMenuMap))
 }
 
+//获取一条角色
 func GetSysRoleById(id int) (v *SysRole, err error) {
 	o := orm.NewOrm()
 	v = &SysRole{Id: id}
@@ -49,21 +46,23 @@ func GetSysRoleById(id int) (v *SysRole, err error) {
 	return nil, err
 }
 
+//获取角色对应菜单以及菜单下方法
 func GetSysRoleMenuActionMap(roleIds string) (v []SysRoleMenuMap) {
-	s, i := utils.GetWhereInSqlByStrId(roleIds)
-	o := orm.NewOrm()
-	sql := "SELECT * FROM sys_role_menu_map WHERE role_id IN (" + s + ")"
-
 	data := make([]SysRoleMenuMap, 0)
-	o.Raw(sql, i).QueryRows(&data)
+	roleIdArr := utils.StringsSplitToSliceInt(roleIds, ",")
+	if len(roleIdArr) == 0 {
+		return data
+	}
 
+	o := orm.NewOrm()
+	qs := o.QueryTable(Table_Sys_Role_Menu_Map)
+	qs.Filter("role_id__in", roleIdArr)
+	qs.All(&data)
 	return data
 }
 
 func AddSysRole(m *SysRoleFormData) (id int64, err error) {
-
 	var roleInfo SysRole
-
 	roleInfo.Intro = m.Intro
 	roleInfo.RoleName = m.RoleName
 	roleInfo.RoleStatus = m.RoleStatus
@@ -155,7 +154,7 @@ func GetSysRoleListByPage(where map[string]string, pageNum int, rowsNum int, ord
 func DeleteSysRole(ids string) (num int64, err error) {
 	s, i := utils.GetWhereInSqlByStrId(ids)
 	if len(i) == 0 {
-		return 0, errors.New("参数错误!")
+		return 0, errors.New("参数错误")
 	}
 	o := orm.NewOrm()
 	res, err := o.Raw("DELETE FROM sys_role WHERE role_id IN ("+s+")", i).Exec()
@@ -168,7 +167,7 @@ func DeleteSysRole(ids string) (num int64, err error) {
 func ModifySysRoleStatus(ids string, roleStatus int) (num int64, err error) {
 	s, i := utils.GetWhereInSqlByStrId(ids)
 	if len(i) == 0 {
-		err = errors.New("参数错误!")
+		err = errors.New("参数错误")
 		return 0, err
 	}
 	o := orm.NewOrm()

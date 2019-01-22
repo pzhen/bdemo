@@ -5,7 +5,10 @@ import "crypto/md5"
 import "math/rand"
 import "time"
 import "strconv"
-import "strings"
+import (
+	"strings"
+	"regexp"
+)
 
 //将字符串加密成 md5
 func String2md5(str string) string {
@@ -43,4 +46,27 @@ func GetWhereInSqlByStrId(strId string) (string, []string){
 		t[i] = " ? "
 	}
 	return strings.Join(t, ","), idArr
+}
+
+
+//切割由数字组成的字符串到切片
+func StringsSplitToSliceInt(s string, sep string) []int64 {
+	if s == "" || sep == "" {
+		return []int64{}
+	}
+
+	p := fmt.Sprintf(`^(\d+[%s]?)+\d$`, sep)
+	match,_:=regexp.MatchString(p,s)
+	if match == false {
+		return []int64{}
+	}
+
+	strArr := strings.Split(s, sep)
+	intArr := make([]int64, len(strArr))
+
+	for k,v := range strArr{
+		intArr[k], _ = strconv.ParseInt(v, 10, 64)
+	}
+
+	return intArr
 }

@@ -10,6 +10,12 @@ import (
 	"github.com/astaxie/beego/orm"
 )
 
+type SysMenuAction struct {
+	FuncId   int    `json:"func_id"`
+	FuncName string `json:"func_name"`
+	FuncDesc string `json:"func_desc"`
+}
+
 type SysMenu struct {
 	Id         int             `orm:"column(menu_id);auto"`
 	MenuRootid int             `orm:"column(menu_rootid);null" description:"上级id"`
@@ -21,14 +27,9 @@ type SysMenu struct {
 	MenuStatus int8            `orm:"column(menu_status)" description:"状态"`
 	MenuLevel  int8            `orm:"column(menu_level)" description:"层级"`
 	MenuPath   string          `orm:"column(menu_path)" description:"路径"`
+
 	Operates   []string        `orm:"-"`
 	FuncsInfo  []SysMenuAction `orm:"-"`
-}
-
-type SysMenuAction struct {
-	FuncId   int    `json:"func_id"`
-	FuncName string `json:"func_name"`
-	FuncDesc string `json:"func_desc"`
 }
 
 type UserMenuIterm struct {
@@ -39,10 +40,6 @@ type UserMenuIterm struct {
 	DefaultUrl string
 	MenuRootid int
 	Operates   []string
-}
-
-func (t *SysMenu) TableName() string {
-	return "sys_menu"
 }
 
 func init() {
@@ -107,10 +104,11 @@ func SaveSysMenu(m *SysMenu) (err error) {
 	return
 }
 
+//删除菜单
 func DeleteSysMenu(ids string) (num int64, err error) {
 	s, i := utils.GetWhereInSqlByStrId(ids)
 	if len(i) == 0 {
-		return 0, errors.New("参数错误!")
+		return 0, errors.New("参数错误")
 	}
 	o := orm.NewOrm()
 	res, err := o.Raw("DELETE FROM sys_menu WHERE menu_id in ("+s+")", i).Exec()
@@ -118,11 +116,11 @@ func DeleteSysMenu(ids string) (num int64, err error) {
 	return num, err
 }
 
-// 修改状态
+//修改菜单状态
 func ModifySysMenuStatus(ids string, menuStatus int) (num int64, err error) {
 	s, i := utils.GetWhereInSqlByStrId(ids)
 	if len(i) == 0 {
-		err = errors.New("参数错误!")
+		err = errors.New("参数错误")
 		return 0, err
 	}
 	o := orm.NewOrm()
@@ -131,6 +129,8 @@ func ModifySysMenuStatus(ids string, menuStatus int) (num int64, err error) {
 	return num, err
 }
 
+//获取用户权限列表
+//根据用户信息获取用户菜单以及菜单下的权限
 func GetUserMenuByRoleIdArr(userInfo SysUser) map[int]*UserMenuIterm {
 	roleIds := userInfo.RoleId
 	userMenu := make(map[int]*UserMenuIterm)
