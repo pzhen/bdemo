@@ -35,15 +35,6 @@ func init() {
 	beego.Router("/sys_role/modify_sysrole_status", &controllers.SysRoleController{}, "Get:ModifySysRoleStatus")
 	beego.Router("/sys_role/delete_sysrole", &controllers.SysRoleController{}, "Get:DeleteSysRole")
 
-	// 订单
-	beego.Router("/order/list_order_flow", &controllers.OrderController{}, "Get:ListOrderFlow")
-	beego.Router("/order/form_add_order_flow", &controllers.OrderController{}, "Get:FormAddOrderFlow")
-	beego.Router("/order/add_order_flow", &controllers.OrderController{}, "Get:AddOrderFlow")
-	beego.Router("/order/delete_order_flow", &controllers.OrderController{}, "Get:DeleteOrderFlow")
-	beego.Router("/order/upload_order_flow", &controllers.OrderController{}, "Post:UploadOrderFlow")
-	beego.Router("/order/order_flow_tongji_tpl", &controllers.OrderController{}, "Get:OrderFlowTongJiTpl")
-	beego.Router("/order/order_flow_tongji", &controllers.OrderController{}, "Get:OrderFlowTongJi")
-
 	// 日志
 	beego.Router("/sys_log/list_syslog", &controllers.SysLogController{}, "Get:GetSysLogListByPage")
 	beego.Router("/sys_log/delete_syslog", &controllers.SysLogController{}, "Get:DeleteSysLog")
