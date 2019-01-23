@@ -24,7 +24,7 @@ func (c *SysLogController) GetSysLogListByPage() {
 	if pageNum <= 0 {
 		pageNum = 1
 	}
-	roleList, count := models.GetSysLogListByPage(where, pageNum, 20, "log_id desc")
+	roleList, count := models.GetSysLogListByPage(where, pageNum, 11, "log_id desc")
 	c.Data["LogList"] = roleList
 	c.Data["LogCount"] = count
 	c.Data["PageNum"] = pageNum
