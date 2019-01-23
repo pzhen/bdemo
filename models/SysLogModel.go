@@ -2,9 +2,10 @@ package models
 
 import (
 	"github.com/astaxie/beego/orm"
-	"strconv"
 	"errors"
 	"bdemo/utils"
+	"math"
+	"strconv"
 )
 
 type SysLog struct {
@@ -27,35 +28,73 @@ func AddSysLog(l *SysLog) (id int64, err error) {
 	return
 }
 
-func GetSysLogListByPage(where map[string]string, pageNum int, rowsNum int, orderBy string) ([]*SysLog, int, error) {
-	dataSql := "SELECT * FROM sys_log WHERE 1=1 "
-	countSql := "SELECT count(*) AS count FROM sys_log WHERE 1=1 "
+func GetSysLogListByPage(where map[string]string, pageNum int, rowsNum int, orderBy string) ([]*SysLog, int) {
+	data := make([]*SysLog, 0)
+	start := (int(math.Abs(float64(pageNum))) - 1) * rowsNum
 
-	start := (pageNum - 1) * rowsNum
+	var sql = "1=1"
+	qb, _ := orm.NewQueryBuilder("mysql")
+	qb.Select("*")
+	qb.From(Table_Sys_Log)
 
-	if v, ok := where["UserName"]; ok && v != "" {
-		dataSql += "AND user_name LIKE %" + v + "%"
-		countSql += "AND user_name LIKE %" + v + "%"
+	if v, ok := where["user_name"]; ok && v != "" {
+		keywords := utils.TrimString(v)
+		sql += " AND user_name like \"%" + keywords + "%\""
 	}
 
-	dataSql += " ORDER BY " + orderBy + " LIMIT " + strconv.Itoa(start) + "," + strconv.Itoa(rowsNum)
+	if v, ok := where["start_time"]; ok && v != "" {
+		startTime := utils.GetTimestamp(v)
+		sql += " AND create_time >= " + strconv.Itoa(int(startTime))
+	}
 
-	data := make([]*SysLog, 0)
-	o := orm.NewOrm()
-	_, err := o.Raw(dataSql).QueryRows(&data)
+	if v, ok := where["end_time"]; ok && v != "" {
+		endTime := utils.GetTimestamp(v)
+		sql += " AND create_time <= " + strconv.Itoa(int(endTime))
+	}
 
-	d := struct {
-		Count int `orm:"column(count)"`
-	}{0}
-
-	err = o.Raw(countSql).QueryRow(&d)
-	return data, d.Count, err
+	qb.Where(sql)
+	qb.OrderBy("log_id").Desc()
+	qb.Limit(rowsNum).Offset(start)
+	orm.NewOrm().Raw(qb.String()).QueryRows(&data)
+	num := GetSysLogCount(where)
+	return data, num
 }
+
+func GetSysLogCount(where map[string]string) int {
+	c := struct {
+		Count int `orm:"column(count)"`
+	}{}
+	var sql = "1=1"
+	qb, _ := orm.NewQueryBuilder("mysql")
+
+	qb.Select("count(*) as count")
+	qb.From(Table_Sys_Log)
+
+	if v, ok := where["user_name"]; ok && v != "" {
+		keywords := utils.TrimString(v)
+		sql += " AND user_name like \"%" + keywords + "%\""
+	}
+
+	if v, ok := where["start_time"]; ok && v != "" {
+		startTime := utils.GetTimestamp(v)
+		sql += " AND create_time >= " + strconv.Itoa(int(startTime))
+	}
+
+	if v, ok := where["end_time"]; ok && v != "" {
+		endTime := utils.GetTimestamp(v)
+		sql += " AND create_time <= " + strconv.Itoa(int(endTime))
+	}
+
+	qb.Where(sql)
+	orm.NewOrm().Raw(qb.String()).QueryRow(&c)
+	return c.Count
+}
+
 
 func DeleteSysLog(ids string) (num int64, err error) {
 	s, i := utils.GetWhereInSqlByStrId(ids)
 	if len(i) == 0 {
-		return 0, errors.New("参数错误!")
+		return 0, errors.New("参数错误")
 	}
 	o := orm.NewOrm()
 	res, err := o.Raw("DELETE FROM sys_log WHERE log_id IN ("+s+")", i).Exec()

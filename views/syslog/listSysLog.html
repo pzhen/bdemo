@@ -27,9 +27,10 @@
 
     <div class="layui-row">
         <form class="layui-form layui-col-md12 x-so">
-            <input class="layui-input" placeholder="开始日" name="start" id="start">
-            <input class="layui-input" placeholder="截止日" name="end" id="end">
-            <input type="text" name="username"  placeholder="请输入用户名" autocomplete="off" class="layui-input">
+            <input class="layui-input" placeholder="开始日" name="start_time" id="start_time" value="{{.where.start_time}}">
+            <input class="layui-input" placeholder="截止日" name="end_time" id="end_time" value="{{.where.end_time}}">
+
+            <input type="text" name="user_name"  placeholder="请输入用户名" autocomplete="off" class="layui-input" value="{{.where.user_name}}">
             <button class="layui-btn"  lay-submit="" lay-filter="sreach" style="margin-top: -3px;"><i class="layui-icon">&#xe615;</i></button>
         </form>
     </div>
@@ -84,8 +85,20 @@
 
 </div>
 <script>
-    layui.use(['form'], function(){
-        form = layui.form;
+
+    layui.use(['form','laydate'], function(){
+        var form = layui.form;
+        var laydate = layui.laydate;
+
+        laydate.render({
+            elem: '#start_time',
+            type: 'datetime'
+        });
+
+        laydate.render({
+            elem: '#end_time',
+            type: 'datetime'
+        });
     });
 
     var urlModifyRoleStatus = '{{urlfor "SysRoleController.ModifySysRoleStatus"}}';
@@ -189,6 +202,8 @@
             content: '\<\div style="padding:20px;display:block;word-break: break-all;word-wrap: break-word;line-height:22px">'+data+'\<\/div>'
         });
     }
+
+
 </script>
 
 </body>

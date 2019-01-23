@@ -37,27 +37,22 @@ func init() {
 }
 
 //获取一条角色
-func GetSysRoleById(id int) (v *SysRole, err error) {
-	o := orm.NewOrm()
-	v = &SysRole{Id: id}
-	if err = o.Read(v); err == nil {
-		return v, nil
+func GetSysRoleById(id int) *SysRole {
+	data := new(SysRole)
+	if id > 0 {
+		orm.NewOrm().QueryTable(Table_Sys_Role).Filter("role_id", id).One(data)
 	}
-	return nil, err
+	return data
 }
 
 //获取角色对应菜单以及菜单下方法
-func GetSysRoleMenuActionMap(roleIds string) (v []SysRoleMenuMap) {
+func GetSysRoleMenuActionMap(roleIds string) []SysRoleMenuMap {
 	data := make([]SysRoleMenuMap, 0)
 	roleIdArr := utils.StringsSplitToSliceInt(roleIds, ",")
 	if len(roleIdArr) == 0 {
 		return data
 	}
-
-	o := orm.NewOrm()
-	qs := o.QueryTable(Table_Sys_Role_Menu_Map)
-	qs.Filter("role_id__in", roleIdArr)
-	qs.All(&data)
+	orm.NewOrm().QueryTable(Table_Sys_Role_Menu_Map).Filter("role_id__in", roleIdArr).All(&data)
 	return data
 }
 

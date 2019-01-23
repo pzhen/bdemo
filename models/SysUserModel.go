@@ -3,7 +3,7 @@ package models
 import (
 	"github.com/astaxie/beego/orm"
 	"encoding/json"
-	"errors"
+	"bdemo/utils"
 )
 
 type SysUser struct {
@@ -29,23 +29,9 @@ func init() {
 	orm.RegisterModel(new(SysUser))
 }
 
-func AddSysUser(m *SysUser) (id int64, err error) {
-	id, err = orm.NewOrm().Insert(m)
-	return
-}
-
-func GetSysUserById(id int) (v *SysUser, err error) {
-	o := orm.NewOrm()
-	v = &SysUser{Id: id}
-	if err = o.Read(v); err == nil {
-		return v, nil
-	}
-	return nil, err
-}
-
 func GetUserInfoBySession(s interface{}) *SysUser {
 	u := new(SysUser)
-	value, ok := s.(string);
+	value, ok := s.(string)
 	if !ok {
 		return u
 	}
@@ -53,14 +39,12 @@ func GetUserInfoBySession(s interface{}) *SysUser {
 	return u
 }
 
-func GetSysUserByUserName(userName string) (u *SysUser, err error) {
-	u = new(SysUser)
+func GetSysUserByUserName(userName string) *SysUser {
+	u := new(SysUser)
+	userName = utils.TrimString(userName)
 	if userName == "" {
-		return u, errors.New("userName param is empty")
+		return u
 	}
-	u.UserName = userName
-	if err = orm.NewOrm().Read(u, "UserName"); err == nil {
-		return u, nil
-	}
-	return nil, err
+	orm.NewOrm().QueryTable(Table_Sys_User).Filter("user_name__contains", userName).One(u)
+	return u
 }

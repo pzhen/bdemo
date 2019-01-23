@@ -14,16 +14,21 @@ func (c *SysLogController) Prepare() {
 }
 
 func (c *SysLogController) GetSysLogListByPage() {
-	var where map[string]string
-	//where["RoleName"] = c.Input().Get("role_name")
+	where := make(map[string]string)
+
+	where["user_name"] = c.Input().Get("user_name")
+	where["start_time"] = c.Input().Get("start_time")
+	where["end_time"] = c.Input().Get("end_time")
+
 	pageNum, _ := strconv.Atoi(c.Input().Get("page_num"))
 	if pageNum <= 0 {
 		pageNum = 1
 	}
-	roleList, count, _ := models.GetSysLogListByPage(where, pageNum, 10, "log_id desc")
+	roleList, count := models.GetSysLogListByPage(where, pageNum, 20, "log_id desc")
 	c.Data["LogList"] = roleList
 	c.Data["LogCount"] = count
 	c.Data["PageNum"] = pageNum
+	c.Data["where"] = where
 	c.TplName = "syslog/listSysLog.html"
 }
 

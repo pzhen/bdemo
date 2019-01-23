@@ -49,12 +49,12 @@
             </th>
             <th width="20">ID</th>
             <th width="20">FID</th>
-            <th width="30">图表</th>
-            <th width="100">菜单名称</th>
-            <th width="180">URL</th>
+            <th width="20">图标</th>
+            <th width="80">菜单名称</th>
+            <th width="80">URL</th>
             <th width="20">Level</th>
             <th width="30">PATH</th>
-            <th width="300">操作</th>
+            <th width="250">操作</th>
             <th width="20">状态</th>
             <th width="120">操作</th>
         </thead>
@@ -85,7 +85,7 @@
                     <td>
                         {{/*{{$value.MenuFuncs}}*/}}
                         {{range $k,$func := $value.FuncsInfo}}
-                            <span class="layui-badge layui-bg-gray">{{$func.FuncName}}</span>
+                            <span class="layui-badge layui-bg-gray">{{$func.FuncName}}</span>&nbsp;
                         {{end}}
                     </td>
                     <td>

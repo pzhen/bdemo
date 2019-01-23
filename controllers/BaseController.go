@@ -22,11 +22,13 @@ type SysBaseController struct {
 	CurrUserInfo   *models.SysUser
 }
 
+//开放地址
 var openAction = []string{
 	"SysUserController.LoginForm",
 	"SysUserController.LoginAction",
 }
 
+//登录后开放地址
 var loginOpenAction = []string{
 	"SysHomeController.Index",
 	"SysHomeController.ServerInfo",
@@ -38,6 +40,7 @@ type SerResJson struct {
 	Data    interface{}
 }
 
+//权限控制,操作日志收集
 func (b *SysBaseController) Prepare() {
 	b.ControllerName, b.ActionName = b.GetControllerAndAction()
 	b.CurrentUrl = b.ControllerName + "." + b.ActionName

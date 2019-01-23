@@ -28,7 +28,7 @@ func (c *SysRoleController) GetSysRoleListByPage() {
 }
 
 func (c *SysRoleController) FormAddSysRole() {
-	MenuList, _ := models.GetSysMenuList()
+	MenuList := models.GetSysMenuList()
 	c.Data["MenuList"] = MenuList
 	c.TplName = "sysrole/formAddSysRole.html"
 }
@@ -49,14 +49,14 @@ func (c *SysRoleController) AddSysRole() {
 func (c *SysRoleController) FormModifySysRole() {
 	RoleId := c.Input().Get("role_id")
 	Id, _ := strconv.Atoi(RoleId)
-	RoleRow, _ := models.GetSysRoleById(Id)
+	RoleRow := models.GetSysRoleById(Id)
 
 	//获取权限
 	PowerList := models.GetSysRoleMenuActionMap(RoleId)
 	//fmt.Println(PowerList)
 
 	// 所有菜单
-	MenuList, _ := models.GetSysMenuList()
+	MenuList := models.GetSysMenuList()
 
 	c.Data["RoleRow"] = RoleRow
 	c.Data["MenuList"] = MenuList

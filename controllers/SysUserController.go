@@ -38,8 +38,8 @@ func (c *SysUserController) LoginAction() {
 	}
 
 	u.Password = utils.String2md5(u.Password)
-	userInfo, err := models.GetSysUserByUserName(u.UserName)
-	if userInfo != nil && err == nil {
+	userInfo := models.GetSysUserByUserName(u.UserName)
+	if userInfo.Id > 0 {
 		if userInfo.UserStatus != 1 {
 			c.DisplayStatus(0, "账号禁用,请联系管理员", "")
 		}

@@ -46,10 +46,9 @@ func init() {
 	orm.RegisterModel(new(SysMenu))
 }
 
-func GetSysMenuList() ([]*SysMenu, error) {
+func GetSysMenuList() []*SysMenu {
 	data := make([]*SysMenu, 0)
-	o := orm.NewOrm()
-	_, err := o.Raw("SELECT * FROM sys_menu ORDER BY menu_path ASC").QueryRows(&data)
+	orm.NewOrm().QueryTable(Table_Sys_Menu).OrderBy("menu_path").All(&data)
 
 	if len(data) > 0 {
 		for key, value := range data {
@@ -58,8 +57,7 @@ func GetSysMenuList() ([]*SysMenu, error) {
 			data[key].FuncsInfo = SysMenuAcitonS
 		}
 	}
-
-	return data, err
+	return data
 }
 
 func AddSysMenu(m *SysMenu) (id int64, err error) {
@@ -75,13 +73,12 @@ func AddSysMenu(m *SysMenu) (id int64, err error) {
 	return
 }
 
-func GetSysMenuById(id int) (v *SysMenu, err error) {
-	o := orm.NewOrm()
-	v = &SysMenu{Id: id}
-	if err = o.Read(v); err == nil {
-		return v, nil
+func GetSysMenuById(id int) *SysMenu {
+	data := new(SysMenu)
+	if id > 0 {
+		orm.NewOrm().QueryTable(Table_Sys_Menu).Filter("menu_id", id).One(data)
 	}
-	return nil, err
+	return data
 }
 
 func SaveSysMenu(m *SysMenu) (err error) {
@@ -100,7 +97,6 @@ func SaveSysMenu(m *SysMenu) (err error) {
 			fmt.Println("Number of records updated in database:", num)
 		}
 	}
-
 	return
 }
 
@@ -134,7 +130,7 @@ func ModifySysMenuStatus(ids string, menuStatus int) (num int64, err error) {
 func GetUserMenuByRoleIdArr(userInfo SysUser) map[int]*UserMenuIterm {
 	roleIds := userInfo.RoleId
 	userMenu := make(map[int]*UserMenuIterm)
-	menuList, _ := GetSysMenuList()
+	menuList := GetSysMenuList()
 	mapList := GetSysRoleMenuActionMap(roleIds)
 	for _, value := range menuList {
 		if value.MenuStatus == 0 {

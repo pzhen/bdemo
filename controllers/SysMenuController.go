@@ -15,13 +15,13 @@ func (c *SysMenuController) Prepare() {
 }
 
 func (c *SysMenuController) ListSysMenu() {
-	menuList, _ := models.GetSysMenuList()
+	menuList := models.GetSysMenuList()
 	c.Data["MenuList"] = menuList
 	c.TplName = "sysmenu/listSysMenu.html"
 }
 
 func (c *SysMenuController) FormAddSysMenu() {
-	MenuList, _ := models.GetSysMenuList()
+	MenuList := models.GetSysMenuList()
 	c.Data["MenuList"] = MenuList
 	c.TplName = "sysmenu/formAddSysMenu.html"
 }
@@ -42,8 +42,8 @@ func (c *SysMenuController) AddSysMenu() {
 func (c *SysMenuController) FormModifySysMenu() {
 	MenuId := c.Input().Get("menu_id")
 	Id, _ := strconv.Atoi(MenuId)
-	MenuRow, _ := models.GetSysMenuById(Id)
-	MenuList, _ := models.GetSysMenuList()
+	MenuRow := models.GetSysMenuById(Id)
+	MenuList := models.GetSysMenuList()
 	c.Data["MenuRow"] = MenuRow
 	c.Data["MenuList"] = MenuList
 	c.TplName = "sysmenu/formModifySysMenu.html"

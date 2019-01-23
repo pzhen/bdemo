@@ -39,6 +39,7 @@ func RandomString(length int) string {
 	return strings.Join(result, "")
 }
 
+//拼接sql where in 的占位符
 func GetWhereInSqlByStrId(strId string) (string, []string){
 	idArr := strings.Split(strId, ",")
 	t := make([]string, len(idArr))
@@ -69,4 +70,39 @@ func StringsSplitToSliceInt(s string, sep string) []int64 {
 	}
 
 	return intArr
+}
+
+//过滤字符串
+func TrimString(s string) string {
+	if s == "" {
+		return ""
+	}
+	r := []rune(s)
+	for i, ch := range r {
+		switch {
+		case ch == '\'':
+			r[i] = 0
+		case ch == '\r':
+			r[i] = 0
+		case ch == '\n':
+			r[i] = 0
+		case ch == '\t':
+			r[i] = 0
+		case ch == '`':
+			r[i] = 0
+		case ch == '"':
+			r[i] = 0
+		}
+	}
+	return string(r)
+}
+
+//日期转时间戳
+func GetTimestamp(d string) int64 {
+	loc, _ := time.LoadLocation("Local")
+	the_time, err := time.ParseInLocation("2006-01-02 15:04:05", d, loc)
+	if err == nil {
+		return the_time.Unix()
+	}
+	return 0
 }
