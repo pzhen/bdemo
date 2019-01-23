@@ -1,3 +1,4 @@
+//建议不同模块分开定义
 package models
 
 const (

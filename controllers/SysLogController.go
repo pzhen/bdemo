@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"bdemo/models"
-	"strconv"
 )
 
 type SysLogController struct {
@@ -14,21 +13,17 @@ func (c *SysLogController) Prepare() {
 }
 
 func (c *SysLogController) GetSysLogListByPage() {
+	order, by := "log_id", "desc"
 	where := make(map[string]string)
-
-	where["user_name"] = c.Input().Get("user_name")
+	where["user_name"] 	= c.Input().Get("user_name")
 	where["start_time"] = c.Input().Get("start_time")
-	where["end_time"] = c.Input().Get("end_time")
+	where["end_time"] 	= c.Input().Get("end_time")
 
-	pageNum, _ := strconv.Atoi(c.Input().Get("page_num"))
-	if pageNum <= 0 {
-		pageNum = 1
-	}
-	roleList, count := models.GetSysLogListByPage(where, pageNum, 11, "log_id desc")
-	c.Data["LogList"] = roleList
-	c.Data["LogCount"] = count
-	c.Data["PageNum"] = pageNum
-	c.Data["where"] = where
+	dataList, count := models.GetSysLogListByPage(where, PageNum, RowsNum, order, by)
+
+	c.Data["where"] 	= where
+	c.Data["DataList"] 	= dataList
+	c.Data["DataCount"] = count
 	c.TplName = "syslog/listSysLog.html"
 }
 

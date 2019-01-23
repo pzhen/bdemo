@@ -39,6 +39,16 @@ func GetUserInfoBySession(s interface{}) *SysUser {
 	return u
 }
 
+func GetUserMenuBySession(s interface{}) map[int]*UserMenuIterm {
+	um := make(map[int]*UserMenuIterm)
+	value, ok := s.(string)
+	if !ok {
+		return um
+	}
+	json.Unmarshal([]byte(value), &um)
+	return um
+}
+
 func GetSysUserByUserName(userName string) *SysUser {
 	u := new(SysUser)
 	userName = utils.TrimString(userName)

@@ -6,6 +6,7 @@ import (
 	"bdemo/utils"
 	"math"
 	"strconv"
+	"strings"
 )
 
 type SysLog struct {
@@ -23,12 +24,10 @@ func init() {
 }
 
 func AddSysLog(l *SysLog) (id int64, err error) {
-	o := orm.NewOrm()
-	id, err = o.Insert(l)
-	return
+	return orm.NewOrm().Insert(l)
 }
 
-func GetSysLogListByPage(where map[string]string, pageNum int, rowsNum int, orderBy string) ([]*SysLog, int) {
+func GetSysLogListByPage(where map[string]string, pageNum int, rowsNum int, order string, by string) ([]*SysLog, int) {
 	data := make([]*SysLog, 0)
 	start := (int(math.Abs(float64(pageNum))) - 1) * rowsNum
 
@@ -53,7 +52,13 @@ func GetSysLogListByPage(where map[string]string, pageNum int, rowsNum int, orde
 	}
 
 	qb.Where(sql)
-	qb.OrderBy("log_id").Desc()
+
+	if strings.ToLower(by) == "desc" {
+		qb.OrderBy(order).Desc()
+	} else {
+		qb.OrderBy(order).Asc()
+	}
+
 	qb.Limit(rowsNum).Offset(start)
 	orm.NewOrm().Raw(qb.String()).QueryRows(&data)
 	num := GetSysLogCount(where)

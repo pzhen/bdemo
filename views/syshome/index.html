@@ -48,7 +48,7 @@
 <div class="left-nav">
     <div id="side-nav">
         <ul id="nav">
-            {{range $key,$value := .UserMenu}}
+            {{range $key,$value := .CurrUserMenu}}
                 {{if eq $value.MenuLevel 1}}
                     <li>
                         <a href="javascript:;">
@@ -57,7 +57,7 @@
                             <i class="iconfont nav_right">&#xe697;</i>
                         </a>
                         <ul class="sub-menu">
-                            {{range $k,$val := $.UserMenu}}
+                            {{range $k,$val := $.CurrUserMenu}}
                                 {{if eq $val.MenuRootid $key}}
                                     <li>
                                         <a _href="{{urlfor $val.DefaultUrl}}">

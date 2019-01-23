@@ -37,7 +37,7 @@
 
     <xblock>
         <button class="layui-btn layui-btn-danger" onclick="deleteAllSysRole()"><i class="layui-icon layui-icon-delete"></i>批量删除</button>
-        <span class="x-right" style="line-height:40px">共有数据：{{.LogCount}} 条</span>
+        <span class="x-right" style="line-height:40px">共有数据：{{.DataCount}} 条</span>
     </xblock>
 
     <table class="layui-table">
@@ -57,7 +57,7 @@
         </thead>
         <tbody>
 
-        {{range $key,$value := .LogList}}
+        {{range $key,$value := .DataList}}
             <tr>
                 <td>
                     <div class="layui-unselect layui-form-checkbox" lay-skin="primary" data-id='{{$value.Id}}'><i class="layui-icon">&#xe605;</i></div>
@@ -176,7 +176,7 @@
         //执行一个laypage实例
         laypage.render({
             elem: 'pageDiv' //注意，这里的 test1 是 ID，不用加 # 号
-            , count: "{{.LogCount}}" //数据总数，从服务端得到
+            , count: "{{.DataCount}}" //数据总数，从服务端得到
             , limit: 10 //每页显示的条数
             ,curr: "{{.PageNum}}"
             ,theme:"#c00"

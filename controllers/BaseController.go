@@ -7,6 +7,7 @@ import (
 	"bdemo/models"
 	"encoding/json"
 	"github.com/astaxie/beego"
+	"strconv"
 )
 
 type SysBaseController struct {
@@ -15,7 +16,9 @@ type SysBaseController struct {
 	ControllerName string
 	ActionName     string
 	CurrentUrl     string
-	CurrUserInfo   *models.SysUser
+
+	CurrUserInfo *models.SysUser
+	CurrUserMenu map[int]*models.UserMenuIterm
 }
 
 //开放地址
@@ -36,6 +39,10 @@ var logOpenAction = []string{
 	"SysUserController.LoginAction",
 }
 
+//分页通用
+var PageNum = 1
+var RowsNum = 11
+
 //返回统一的格式
 type SerResJson struct {
 	Code    int
@@ -51,16 +58,34 @@ func (b *SysBaseController) Prepare() {
 	if !b.CheckAuth() {
 		b.DisplayStatus(0, "对不起您没有权限", "")
 	}
-	//用户信息
+	//用户信息/菜单
+	b.CurrUserMenu = models.GetUserMenuBySession(b.GetSession("UserMenu"))
 	b.CurrUserInfo = models.GetUserInfoBySession(b.GetSession("UserSession"))
-	b.Data["CurrUserInfo"] = b.CurrUserInfo
+
+	//分页设置
+	if pageNum, _ := strconv.Atoi(b.Input().Get("page_num")); pageNum <= 0 {
+		PageNum = 1
+	} else {
+		PageNum = pageNum
+	}
 
 	//记录日志
-	b.logCollection()
+	b.actionLogCollect()
+
+	//模板变量
+	b.Data["CurrUserMenu"] = b.CurrUserMenu
+	b.Data["CurrUserInfo"] = b.CurrUserInfo
+
+	b.Data["PageNum"] = PageNum
+	b.Data["RowsNum"] = RowsNum
+
+	b.Data["AppName"] = beego.AppConfig.String("appname")
+	b.Data["Version"] = beego.AppConfig.String("version")
+	b.Data["CurrTime"] = time.Now().Format("2006-01-02 03:04:05 PM")
 }
 
 //收集操作日志
-func (b *SysBaseController) logCollection() {
+func (b *SysBaseController) actionLogCollect() {
 	flag := false
 	for _, v := range logOpenAction {
 		if v == b.CurrentUrl {
@@ -71,13 +96,14 @@ func (b *SysBaseController) logCollection() {
 		b.Controller.Ctx.Request.ParseForm()
 
 		formJson, _ := json.Marshal(b.Controller.Ctx.Request.Form)
-		log         := models.SysLog{}
+		log := models.SysLog{}
 
-		log.Url        = fmt.Sprintf("%s", b.Controller.Ctx.Request.URL)
-		log.UrlFor     = b.CurrentUrl
-		log.UserId     = b.CurrUserInfo.Id
-		log.UserName   = b.CurrUserInfo.UserName
-		log.FormData   = string(formJson)
+		log.Url = fmt.Sprintf("%s", b.Controller.Ctx.Request.URL)
+		log.UrlFor = b.CurrentUrl
+		log.UserId = b.CurrUserInfo.Id
+
+		log.UserName = b.CurrUserInfo.UserName
+		log.FormData = string(formJson)
 		log.CreateTime = uint(time.Now().Unix())
 
 		models.AddSysLog(&log)
