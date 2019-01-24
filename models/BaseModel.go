@@ -1,6 +1,8 @@
 //建议不同模块分开定义
 package models
 
+import "strings"
+
 const (
 	//SYS 模块
 	Table_Sys_User          = "sys_user"
@@ -13,3 +15,12 @@ const (
 const (
 	//other 模块
 )
+
+func GetSqlOrderBy(orderBy map[string]string) string {
+	var sort = ""
+	for k,v := range orderBy {
+		sort += k + " " + v + ","
+	}
+	sort = strings.TrimRight(sort, ",")
+	return sort
+}

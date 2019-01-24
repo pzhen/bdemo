@@ -27,17 +27,17 @@
 
     <div class="layui-row">
         <form class="layui-form layui-col-md12 x-so">
-            <input class="layui-input" placeholder="开始日" name="start_time" id="start_time" value="{{.where.start_time}}">
-            <input class="layui-input" placeholder="截止日" name="end_time" id="end_time" value="{{.where.end_time}}">
+            <input class="layui-input" placeholder="开始日" name="start_time" id="start_time" value="{{.PageInfo.Where.start_time}}">
+            <input class="layui-input" placeholder="截止日" name="end_time" id="end_time" value="{{.PageInfo.Where.end_time}}">
 
-            <input type="text" name="user_name"  placeholder="请输入用户名" autocomplete="off" class="layui-input" value="{{.where.user_name}}">
+            <input type="text" name="user_name"  placeholder="请输入用户名" autocomplete="off" class="layui-input" value="{{.PageInfo.Where.user_name}}">
             <button class="layui-btn"  lay-submit="" lay-filter="sreach" style="margin-top: -3px;"><i class="layui-icon">&#xe615;</i></button>
         </form>
     </div>
 
     <xblock>
-        <button class="layui-btn layui-btn-danger" onclick="deleteAllSysRole()"><i class="layui-icon layui-icon-delete"></i>批量删除</button>
-        <span class="x-right" style="line-height:40px">共有数据：{{.DataCount}} 条</span>
+        <button class="layui-btn layui-btn-danger" onclick="deleteDataByBatch()"><i class="layui-icon layui-icon-delete"></i>批量删除</button>
+        <span class="x-right" style="line-height:40px">共有数据：{{.PageInfo.TotalRows}} 条</span>
     </xblock>
 
     <table class="layui-table">
@@ -72,7 +72,7 @@
                 </td>
                 <td>{{$value.CreateTime | convertt}}</td>
                 <td class="td-manage">
-                    <a title="删除" onclick="deleteSysRole(this,'{{$value.Id}}')" href="javascript:;">
+                    <a title="删除" onclick="deleteDataByOne(this,'{{$value.Id}}')" href="javascript:;">
                         <i class="layui-icon">&#xe640;</i>
                     </a>
                 </td>
@@ -85,127 +85,28 @@
 
 </div>
 <script>
+    //批量删除地址
+    var deleteUrl = '{{urlfor "SysLogController.DeleteSysLog"}}';
 
-    layui.use(['form','laydate'], function(){
-        var form = layui.form;
-        var laydate = layui.laydate;
-
-        laydate.render({
-            elem: '#start_time',
-            type: 'datetime'
-        });
-
-        laydate.render({
-            elem: '#end_time',
-            type: 'datetime'
-        });
-    });
-
-    var urlModifyRoleStatus = '{{urlfor "SysRoleController.ModifySysRoleStatus"}}';
-    var urlDeleteRole = '{{urlfor "SysRoleController.DeleteSysRole"}}';
-
-    // 批量删除
-    function deleteAllSysRole()
-    {
-        var idArr = [];
-        $(".layui-form-checked").each(function () {
-            var currDataId = $(this).attr("data-id");
-            if ("undefined" != typeof(currDataId)){
-                idArr.push(currDataId)
-            }
-        });
-
-        if(!idArr.length){
-            layer.msg("未选中记录",{icon:1,time:1000});
-            return
-        }
-
-        layer.confirm('确认要执行操作吗？',{btn:['确定','取消']},function(index){
-            $.ajax({
-                url: decodeURI(urlDeleteRole),
-                data: {"role_ids":idArr.join()},
-                type: "get",
-                dataType: "json",
-                success: function (data) {
-                    var messge = "网络繁忙...";
-                    if(data.Message) {
-                        messge = data.Message;
-                    }
-
-                    layer.msg(messge,{icon:1,time:1000},function () {
-                        if(data.Code > 0){
-                            window.location.href=data.Data;
-                        }
-                    });
-                }
-            });
-            return false;
-        });
-    }
-
-    // 单条删除
-    function deleteSysRole(obj,id)
-    {
-        layer.confirm('确认要执行操作吗？',{btn:['确定','取消']},function(index){
-            $.ajax({
-                url: decodeURI(urlDeleteRole),
-                data: {"role_ids":id},
-                type: "get",
-                dataType: "json",
-                success: function (data) {
-                    var messge = "网络繁忙...";
-                    if(data.Message) {
-                        messge = data.Message;
-                    }
-
-                    layer.msg(messge,{icon:1,time:1000},function () {
-                        if(data.Code > 0){
-                            window.location.href=data.Data;
-                        }
-                    });
-                }
-            });
-            return false;
-        });
-    }
-
-
+    //分页
     layui.use('laypage', function () {
         var laypage = layui.laypage;
-
         //执行一个laypage实例
         laypage.render({
             elem: 'pageDiv' //注意，这里的 test1 是 ID，不用加 # 号
-            , count: "{{.DataCount}}" //数据总数，从服务端得到
-            , limit: 10 //每页显示的条数
-            ,curr: "{{.PageNum}}"
-            ,theme:"#c00"
-            ,layout:['prev','page','next','skip']
-                , jump: function (obj, first) {
-            //obj包含了当前分页的所有参数，比如：
-            //console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
-            //console.log(obj.limit); //得到每页显示的条数
-
-            //首次不执行
-            if (!first) {
-                window.location.href= "/sys_log/list_syslog?page_num="+obj.curr+""
+            , count: "{{.PageInfo.TotalRows}}" //数据总数，从服务端得到
+            , limit: "{{.PageInfo.RowsNum}}" //每页显示的条数
+            , curr:  "{{.PageInfo.PageNum}}"
+            , theme: "#c00"
+            , layout: ['count', 'prev', 'page', 'next', 'skip']
+            , jump: function (obj, first) {
+                //首次不执行
+                if (!first) {
+                    window.location.href = "{{.PageInfo.PageUrl}}page_num=" + obj.curr
+                }
             }
-        }
-    });
-    });
-
-    function showAllContent(o,data) {
-        layer.open({
-            type: 1,
-            area: ['600px', '360px'],
-            shadeClose: true, //点击遮罩关闭
-            content: '\<\div style="padding:20px;display:block;word-break: break-all;word-wrap: break-word;line-height:22px">'+data+'\<\/div>'
         });
-    }
-
-
+    });
 </script>
-
 </body>
-
 </html>

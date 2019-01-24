@@ -35,13 +35,12 @@ var loginOpenAction = []string{
 
 //不需要收集操作日志的地址
 var logOpenAction = []string{
+	"SysHomeController.Index",
 	"SysUserController.LoginForm",
 	"SysUserController.LoginAction",
+	"SysHomeController.ServerInfo",
+	"SysLogController.GetSysLogListByPage",
 }
-
-//分页通用
-var PageNum = 1
-var RowsNum = 11
 
 //返回统一的格式
 type SerResJson struct {
@@ -62,23 +61,12 @@ func (b *SysBaseController) Prepare() {
 	b.CurrUserMenu = models.GetUserMenuBySession(b.GetSession("UserMenu"))
 	b.CurrUserInfo = models.GetUserInfoBySession(b.GetSession("UserSession"))
 
-	//分页设置
-	if pageNum, _ := strconv.Atoi(b.Input().Get("page_num")); pageNum <= 0 {
-		PageNum = 1
-	} else {
-		PageNum = pageNum
-	}
-
 	//记录日志
 	b.actionLogCollect()
 
 	//模板变量
 	b.Data["CurrUserMenu"] = b.CurrUserMenu
 	b.Data["CurrUserInfo"] = b.CurrUserInfo
-
-	b.Data["PageNum"] = PageNum
-	b.Data["RowsNum"] = RowsNum
-
 	b.Data["AppName"] = beego.AppConfig.String("appname")
 	b.Data["Version"] = beego.AppConfig.String("version")
 	b.Data["CurrTime"] = time.Now().Format("2006-01-02 03:04:05 PM")
@@ -148,6 +136,38 @@ func (b *SysBaseController) CheckAuth() bool {
 		}
 	}
 	return flag
+}
+
+//通用分页配置
+func (b *SysBaseController) PageInfo(where map[string]string, totalRows, rowsNum int) {
+	pageNum, _ := strconv.Atoi(b.Input().Get("page_num"))
+	if pageNum <= 0 {
+		pageNum = 1
+	}
+
+	i := ""
+	for k, v := range where {
+		if v != "" {
+			i += k + "=" + v + "&"
+		}
+	}
+	pageUrl := b.URLFor(b.CurrentUrl) + "?" + i
+
+	PageInfo := struct {
+		Where     map[string]string
+		RowsNum   int
+		TotalRows int
+		PageUrl   string
+		PageNum   int
+	}{
+		Where:     where,
+		RowsNum:   rowsNum,
+		TotalRows: totalRows,
+		PageUrl:   pageUrl,
+		PageNum:   pageNum,
+	}
+
+	b.Data["PageInfo"] = PageInfo
 }
 
 //公共返回方法

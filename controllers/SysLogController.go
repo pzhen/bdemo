@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"bdemo/models"
+	"strconv"
 )
 
 type SysLogController struct {
@@ -13,23 +14,25 @@ func (c *SysLogController) Prepare() {
 }
 
 func (c *SysLogController) GetSysLogListByPage() {
-	order, by := "log_id", "desc"
+	rowsNum := 10
+	order := map[string]string{"log_id": "desc"}
+	pageNum,_ := strconv.Atoi(c.Input().Get("page_num"))
+
 	where := make(map[string]string)
 	where["user_name"] 	= c.Input().Get("user_name")
 	where["start_time"] = c.Input().Get("start_time")
 	where["end_time"] 	= c.Input().Get("end_time")
 
-	dataList, count := models.GetSysLogListByPage(where, PageNum, RowsNum, order, by)
+	dataList, totalRows := models.GetSysLogListByPage(where, pageNum, rowsNum, order)
+	c.PageInfo(where,totalRows, rowsNum)
 
-	c.Data["where"] 	= where
 	c.Data["DataList"] 	= dataList
-	c.Data["DataCount"] = count
 	c.TplName = "syslog/listSysLog.html"
 }
 
 func (c *SysLogController) DeleteSysLog() {
-	ids := c.Input().Get("log_ids")
-	_, err := models.DeleteSysLog(ids)
+	id := c.Input().Get("id")
+	_, err := models.DeleteSysLog(id)
 	if err != nil {
 		c.DisplayJson(0, "修改失败", err.Error())
 	}
