@@ -28,10 +28,8 @@ func init() {
 
 	// 角色
 	beego.Router("/sys_role/list_sysrole", &controllers.SysRoleController{}, "Get:GetSysRoleListByPage")
-	beego.Router("/sys_role/form_add_sysrole", &controllers.SysRoleController{}, "Get:FormAddSysRole")
-	beego.Router("/sys_role/form_modify_sysrole", &controllers.SysRoleController{}, "Get:FormModifySysRole")
+	beego.Router("/sys_role/form_sysrole", &controllers.SysRoleController{}, "Get:FormSysRole")
 	beego.Router("/sys_role/save_sysrole", &controllers.SysRoleController{}, "Post:SaveSysRole")
-	beego.Router("/sys_role/add_sysrole", &controllers.SysRoleController{}, "Post:AddSysRole")
 	beego.Router("/sys_role/modify_sysrole_status", &controllers.SysRoleController{}, "Get:ModifySysRoleStatus")
 	beego.Router("/sys_role/delete_sysrole", &controllers.SysRoleController{}, "Get:DeleteSysRole")
 

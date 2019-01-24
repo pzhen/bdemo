@@ -7,15 +7,9 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego/orm"
+	"math"
+	"time"
 )
-
-type SysRoleFormData struct {
-	RoleId     int
-	Intro      string
-	MenuMap    string
-	RoleName   string
-	RoleStatus int
-}
 
 type SysRole struct {
 	Id         int    `orm:"column(role_id);auto" description:"角色ID"`
@@ -24,6 +18,7 @@ type SysRole struct {
 	RoleStatus int    `orm:"column(role_status)" description:"状态"`
 	CreateTime uint   `orm:"column(create_time)"`
 	UpdateTime uint   `orm:"column(update_time)"`
+	MenuMap    string `orm:"-"`
 }
 
 type SysRoleMenuMap struct {
@@ -56,14 +51,27 @@ func GetSysRoleMenuActionMap(roleIds string) []SysRoleMenuMap {
 	return data
 }
 
-func AddSysRole(m *SysRoleFormData) (id int64, err error) {
+//修改角色
+func SaveSysRole(m *SysRole) (id int64, err error) {
 	var roleInfo SysRole
+	roleInfo.Id = m.Id
 	roleInfo.Intro = m.Intro
 	roleInfo.RoleName = m.RoleName
 	roleInfo.RoleStatus = m.RoleStatus
+	roleInfo.UpdateTime = uint(time.Now().Unix())
 
 	o := orm.NewOrm()
-	id, err = o.Insert(&roleInfo)
+	if m.Id > 0 {
+		roleInfo.CreateTime = m.CreateTime
+		id, err = o.Update(&roleInfo)
+		if err == nil {
+			o.Delete(&SysRoleMenuMap{Id: m.Id})
+		}
+	} else {
+		roleInfo.CreateTime = uint(time.Now().Unix())
+		id, err = o.Insert(&roleInfo)
+		m.Id = int(id)
+	}
 
 	//关系入库
 	MenuMapArr := strings.Split(m.MenuMap, ",")
@@ -71,9 +79,8 @@ func AddSysRole(m *SysRoleFormData) (id int64, err error) {
 		if v == "" {
 			continue
 		}
-
 		insert := SysRoleMenuMap{}
-		insert.Id = int(id)
+		insert.Id = m.Id
 		if strings.Contains(v, "-") == true {
 			mapArr := strings.Split(v, "-")
 			insert.MenuId, _ = strconv.Atoi(mapArr[0])
@@ -88,85 +95,84 @@ func AddSysRole(m *SysRoleFormData) (id int64, err error) {
 	return
 }
 
-func SaveSysRole(m *SysRoleFormData) (id int64, err error) {
-	var roleInfo SysRole
-	roleInfo.Id = m.RoleId
-	roleInfo.Intro = m.Intro
-	roleInfo.RoleName = m.RoleName
-	roleInfo.RoleStatus = m.RoleStatus
-
-	o := orm.NewOrm()
-	id, err = o.Update(&roleInfo)
-	o.Delete(&SysRoleMenuMap{Id: m.RoleId})
-
-	//关系入库
-	MenuMapArr := strings.Split(m.MenuMap, ",")
-	for _, v := range MenuMapArr {
-		if v == "" {
-			continue
-		}
-		insert := SysRoleMenuMap{}
-		insert.Id = m.RoleId
-		if strings.Contains(v, "-") == true {
-			mapArr := strings.Split(v, "-")
-			insert.MenuId, _ = strconv.Atoi(mapArr[0])
-			insert.ActionId, _ = strconv.Atoi(mapArr[1])
-		} else {
-			insert.MenuId, _ = strconv.Atoi(v)
-			insert.ActionId = 0
-		}
-
-		o.Insert(&insert)
+//拼接where条件
+func GetSysRoleListWhereSql(where map[string]string) string {
+	var sql = "1=1"
+	if v, ok := where["role_name"]; ok && v != "" {
+		keywords := utils.TrimString(v)
+		sql += " AND role_name like \"%" + keywords + "%\""
 	}
-	return
+
+	if v, ok := where["start_time"]; ok && v != "" {
+		startTime := utils.GetTimestamp(v)
+		sql += " AND create_time >= " + strconv.Itoa(int(startTime))
+	}
+
+	if v, ok := where["end_time"]; ok && v != "" {
+		endTime := utils.GetTimestamp(v)
+		sql += " AND create_time <= " + strconv.Itoa(int(endTime))
+	}
+	return sql
 }
 
-func GetSysRoleListByPage(where map[string]string, pageNum int, rowsNum int, orderBy string) ([]*SysRole, int, error) {
-	dataSql := "SELECT * FROM sys_role WHERE 1=1 "
-	countSql := "SELECT count(*) AS count FROM sys_role WHERE 1=1 "
-
-	start := (pageNum - 1) * rowsNum
-
-	if v, ok := where["RoleName"]; ok && v != "" {
-		dataSql += "AND role_name LIKE %" + v + "%"
-		countSql += "AND role_name LIKE %" + v + "%"
-	}
-
-	dataSql += " ORDER BY " + orderBy + " LIMIT " + strconv.Itoa(start) + "," + strconv.Itoa(rowsNum)
-
-	data := make([]*SysRole, 0)
-	o := orm.NewOrm()
-	_, err := o.Raw(dataSql).QueryRows(&data)
-
-	d := struct {
+//获取数量
+func GetSysRoleCount(where map[string]string) int {
+	c := struct {
 		Count int `orm:"column(count)"`
-	}{0}
+	}{}
 
-	err = o.Raw(countSql).QueryRow(&d)
-	return data, d.Count, err
+	qb, _ := orm.NewQueryBuilder("mysql")
+	qb.Select("count(*) as count")
+	qb.From(Table_Sys_Role)
+	qb.Where(GetSysRoleListWhereSql(where))
+	orm.NewOrm().Raw(qb.String()).QueryRow(&c)
+
+	return c.Count
 }
 
-func DeleteSysRole(ids string) (num int64, err error) {
-	s, i := utils.GetWhereInSqlByStrId(ids)
-	if len(i) == 0 {
+//分页列表
+func GetSysRoleListByPage(where map[string]string, pageNum int, rowsNum int, orderBy map[string]string) ([]*SysRole, int) {
+	data := make([]*SysRole, 0)
+	start := 0
+	if pageNum <= 0 {
+	}else {
+		start = (int(math.Abs(float64(pageNum))) - 1) * rowsNum
+	}
+
+	//获取数据
+	qb, _ := orm.NewQueryBuilder("mysql")
+	qb.Select("*")
+	qb.From(Table_Sys_Role)
+	qb.Where(GetSysRoleListWhereSql(where))
+	qb.OrderBy(GetSqlOrderBy(orderBy))
+	qb.Limit(rowsNum).Offset(start)
+	orm.NewOrm().Raw(qb.String()).QueryRows(&data)
+
+	//获取数量
+	totalRows := GetSysRoleCount(where)
+	return data, totalRows
+}
+
+//删除角色
+func DeleteSysRole(ids string) (int64, error) {
+	idArr := utils.StringsSplitToSliceInt(ids, ",")
+	if len(idArr) == 0 {
 		return 0, errors.New("参数错误")
 	}
-	o := orm.NewOrm()
-	res, err := o.Raw("DELETE FROM sys_role WHERE role_id IN ("+s+")", i).Exec()
-	o.Raw("DELETE FROM sys_role_menu_map WHERE role_id IN ("+s+")", i).Exec()
-	num, _ = res.RowsAffected()
-	return num, err
+	num, err := orm.NewOrm().QueryTable(Table_Sys_Role).Filter("role_id__in", idArr).Delete()
+	if err != nil {
+		orm.NewOrm().QueryTable(Table_Sys_Role_Menu_Map).Filter("role_id__in", idArr).Delete()
+		return num, nil
+	}
+	return 0, err
 }
 
-// 修改状态
-func ModifySysRoleStatus(ids string, roleStatus int) (num int64, err error) {
-	s, i := utils.GetWhereInSqlByStrId(ids)
-	if len(i) == 0 {
-		err = errors.New("参数错误")
-		return 0, err
+//修改状态
+func ModifySysRoleStatus(ids string, roleStatus int) (int64, error) {
+	idArr := utils.StringsSplitToSliceInt(ids, ",")
+	if len(idArr) == 0 {
+		return 0, errors.New("参数错误")
 	}
-	o := orm.NewOrm()
-	res, err := o.Raw("UPDATE sys_role SET role_status = ? WHERE role_id IN ("+s+")", roleStatus, i).Exec()
-	num, _ = res.RowsAffected()
-	return num, err
+	return orm.NewOrm().QueryTable(Table_Sys_Role).Filter("role_id__in", idArr).Update(orm.Params{
+		"role_status": roleStatus})
 }

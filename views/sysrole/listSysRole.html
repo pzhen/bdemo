@@ -27,22 +27,22 @@
 
     <div class="layui-row">
         <form class="layui-form layui-col-md12 x-so">
-            <input class="layui-input" placeholder="开始日" name="start" id="start">
-            <input class="layui-input" placeholder="截止日" name="end" id="end">
-            <input type="text" name="username"  placeholder="请输入用户名" autocomplete="off" class="layui-input">
+            <input class="layui-input" placeholder="开始日" name="start_time" id="start_time" value="{{.PageInfo.Where.start_time}}">
+            <input class="layui-input" placeholder="截止日" name="end_time" id="end_time" value="{{.PageInfo.Where.end_time}}">
+            <input type="text" name="role_name"  placeholder="请输入用户名" autocomplete="off" class="layui-input" value="{{.PageInfo.Where.role_name}}">
             <button class="layui-btn"  lay-submit="" lay-filter="sreach" style="margin-top: -3px;"><i class="layui-icon">&#xe615;</i></button>
         </form>
     </div>
 
     <xblock>
 
-        <button class="layui-btn" onclick="x_admin_show('添加角色','{{urlfor "SysRoleController.FormAddSysRole"}}')"><i class="layui-icon"></i>添加</button>
+        <button class="layui-btn" onclick="x_admin_show('添加角色','{{urlfor "SysRoleController.FormSysRole"}}')"><i class="layui-icon"></i>添加</button>
 
-        <button class="layui-btn" style="background-color: #5FB878" onclick="modifyAllRoleStatus(1)"><i class="layui-icon layui-icon-play"></i>批量开启</button>
-        <button class="layui-btn layui-bg-orange" onclick="modifyAllRoleStatus(0)"><i class="layui-icon layui-icon-pause"></i>批量关闭</button>
-        <button class="layui-btn layui-btn-danger" onclick="deleteAllSysRole()"><i class="layui-icon layui-icon-delete"></i>批量删除</button>
+        <button class="layui-btn" style="background-color: #5FB878" onclick="modifyStatusByBatch(1)"><i class="layui-icon layui-icon-play"></i>批量开启</button>
+        <button class="layui-btn layui-bg-orange" onclick="modifyStatusByBatch(0)"><i class="layui-icon layui-icon-pause"></i>批量关闭</button>
+        <button class="layui-btn layui-btn-danger" onclick="deleteDataByBatch()"><i class="layui-icon layui-icon-delete"></i>批量删除</button>
 
-        <span class="x-right" style="line-height:40px">共有数据：{{.RoleCount}} 条</span>
+        <span class="x-right" style="line-height:40px">共有数据：{{.PageInfo.TotalRows}} 条</span>
     </xblock>
 
     <table class="layui-table">
@@ -69,7 +69,9 @@
                 <td>{{$value.Id}}</td>
                 <td>{{$value.RoleName}}</td>
                 <td>{{$value.Intro}}</td>
-                <td>{{$value.CreateTime | convertt}}</td>
+                <td>
+                    {{$value.CreateTime | convertt}}
+                </td>
                 <td>
                     {{$value.UpdateTime| convertt}}
                 </td>
@@ -83,19 +85,19 @@
                 <td class="td-manage">
 
                     {{if eq $value.RoleStatus 1}}
-                        <a onclick="modifySysRoleStatus(this,'{{$value.Id}}','0')" href="javascript:;"  title="关闭">
+                        <a onclick="modifyStatusByOne(this,'{{$value.Id}}','0')" href="javascript:;"  title="关闭">
                             <i class="layui-icon layui-icon-pause"></i>
                         </a>
                     {{else}}
-                        <a onclick="modifySysRoleStatus(this,'{{$value.Id}}','1')" href="javascript:;"  title="启用">
+                        <a onclick="modifyStatusByOne(this,'{{$value.Id}}','1')" href="javascript:;"  title="启用">
                             <i class="layui-icon layui-icon-play"></i>
                         </a>
                     {{end}}
 
-                    <a title="编辑"  onclick="x_admin_show('编辑角色','{{urlfor "SysRoleController.FormModifySysRole" "role_id" $value.Id}}')" href="javascript:;">
+                    <a title="编辑"  onclick="x_admin_show('编辑角色','{{urlfor "SysRoleController.FormSysRole" "role_id" $value.Id}}')" href="javascript:;">
                         <i class="layui-icon">&#xe642;</i>
                     </a>
-                    <a title="删除" onclick="deleteSysRole(this,'{{$value.Id}}')" href="javascript:;">
+                    <a title="删除" onclick="deleteDataByOne(this,'{{$value.Id}}')" href="javascript:;">
                         <i class="layui-icon">&#xe640;</i>
                     </a>
                 </td>
@@ -108,166 +110,27 @@
 
 </div>
 <script>
-    layui.use(['form'], function(){
-        form = layui.form;
-    });
 
-    var urlModifyRoleStatus = '{{urlfor "SysRoleController.ModifySysRoleStatus"}}';
-    var urlDeleteRole = '{{urlfor "SysRoleController.DeleteSysRole"}}';
-
-    // 批量删除
-    function deleteAllSysRole()
-    {
-        var idArr = [];
-        $(".layui-form-checked").each(function () {
-            var currDataId = $(this).attr("data-id");
-            if ("undefined" != typeof(currDataId)){
-                idArr.push(currDataId)
-            }
-        });
-
-        if(!idArr.length){
-            layer.msg("未选中记录",{icon:1,time:1000});
-            return
-        }
-
-        layer.confirm('确认要执行操作吗？',{btn:['确定','取消']},function(index){
-            $.ajax({
-                url: decodeURI(urlDeleteRole),
-                data: {"role_ids":idArr.join()},
-                type: "get",
-                dataType: "json",
-                success: function (data) {
-                    var messge = "网络繁忙...";
-                    if(data.Message) {
-                        messge = data.Message;
-                    }
-
-                    layer.msg(messge,{icon:1,time:1000},function () {
-                        if(data.Code > 0){
-                            window.location.href=data.Data;
-                        }
-                    });
-                }
-            });
-            return false;
-        });
-    }
-
-    // 批量修改状态
-    function modifyAllRoleStatus(status)
-    {
-        var idArr = [];
-        $(".layui-form-checked").each(function () {
-            var currDataId = $(this).attr("data-id");
-            if ("undefined" != typeof(currDataId)){
-                idArr.push(currDataId)
-            }
-        });
-
-        if(!idArr.length){
-            layer.msg("未选中记录",{icon:1,time:1000});
-            return
-        }
-
-        layer.confirm('确认要执行操作吗？',{btn:['确定','取消']},function(index){
-            $.ajax({
-                url: decodeURI(urlModifyRoleStatus),
-                data: {"role_ids":idArr.join(),"role_status":status},
-                type: "get",
-                dataType: "json",
-                success: function (data) {
-                    var messge = "网络繁忙...";
-                    if(data.Message) {
-                        messge = data.Message;
-                    }
-
-                    layer.msg(messge,{icon:1,time:1000},function () {
-                        if(data.Code > 0){
-                            window.location.href=data.Data;
-                        }
-                    });
-                }
-            });
-            return false;
-        });
-    }
-
-    // 单条修改状态
-    function modifySysRoleStatus(obj,id,status)
-    {
-        layer.confirm('确认要执行操作吗？',{btn:['确定','取消']},function(index){
-            $.ajax({
-                url: decodeURI(urlModifyRoleStatus),
-                data: {"role_ids":id,"role_status":status},
-                type: "get",
-                dataType: "json",
-                success: function (data) {
-                    var messge = "网络繁忙...";
-                    if(data.Message) {
-                        messge = data.Message;
-                    }
-
-                    layer.msg(messge,{icon:1,time:1000},function () {
-                        if(data.Code > 0){
-                            window.location.href=data.Data;
-                        }
-                    });
-                }
-            });
-            return false;
-        });
-    }
-
-    // 单条删除
-    function deleteSysRole(obj,id)
-    {
-        layer.confirm('确认要执行操作吗？',{btn:['确定','取消']},function(index){
-            $.ajax({
-                url: decodeURI(urlDeleteRole),
-                data: {"role_ids":id},
-                type: "get",
-                dataType: "json",
-                success: function (data) {
-                    var messge = "网络繁忙...";
-                    if(data.Message) {
-                        messge = data.Message;
-                    }
-
-                    layer.msg(messge,{icon:1,time:1000},function () {
-                        if(data.Code > 0){
-                            window.location.href=data.Data;
-                        }
-                    });
-                }
-            });
-            return false;
-        });
-    }
-
-
+    var modifyStatusUrl = '{{urlfor "SysRoleController.ModifySysRoleStatus"}}';
+    var deleteUrl = '{{urlfor "SysRoleController.DeleteSysRole"}}';
+    //分页
     layui.use('laypage', function () {
         var laypage = layui.laypage;
-
         //执行一个laypage实例
         laypage.render({
             elem: 'pageDiv' //注意，这里的 test1 是 ID，不用加 # 号
-            , count: "{{.RoleCount}}" //数据总数，从服务端得到
-            , limit: 10 //每页显示的条数
-            ,curr: "{{.PageNum}}"
-            ,theme:"#c00"
-            ,layout:['prev','page','next','skip']
-                , jump: function (obj, first) {
-            //obj包含了当前分页的所有参数，比如：
-            //console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
-            //console.log(obj.limit); //得到每页显示的条数
-
-            //首次不执行
-            if (!first) {
-                window.location.href= "/sys_role/list_sysrole?page_num="+obj.curr+""
+            , count: "{{.PageInfo.TotalRows}}" //数据总数，从服务端得到
+            , limit: "{{.PageInfo.RowsNum}}" //每页显示的条数
+            , curr:  "{{.PageInfo.PageNum}}"
+            , theme: "#c00"
+            , layout: ['count', 'prev', 'page', 'next', 'skip']
+            , jump: function (obj, first) {
+                //首次不执行
+                if (!first) {
+                    window.location.href = "{{.PageInfo.PageUrl}}page_num=" + obj.curr
+                }
             }
-        }
-    });
+        });
     });
 </script>
 

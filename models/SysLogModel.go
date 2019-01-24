@@ -22,7 +22,8 @@ func init() {
 	orm.RegisterModel(new(SysLog))
 }
 
-func AddSysLog(l *SysLog) (id int64, err error) {
+//添加
+func AddSysLog(l *SysLog) (int64, error) {
 	return orm.NewOrm().Insert(l)
 }
 
@@ -86,9 +87,9 @@ func GetSysLogListByPage(where map[string]string, pageNum int, rowsNum int, orde
 
 //删除
 func DeleteSysLog(ids string) (int64, error) {
-	logIdArr := utils.StringsSplitToSliceInt(ids, ",")
-	if len(logIdArr) == 0 {
+	idArr := utils.StringsSplitToSliceInt(ids, ",")
+	if len(idArr) == 0 {
 		return 0, errors.New("参数错误")
 	}
-	return orm.NewOrm().QueryTable(Table_Sys_Log).Filter("log_id__in", logIdArr).Delete()
+	return orm.NewOrm().QueryTable(Table_Sys_Log).Filter("log_id__in", idArr).Delete()
 }

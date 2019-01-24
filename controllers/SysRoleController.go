@@ -14,46 +14,29 @@ func (c *SysRoleController) Prepare() {
 }
 
 func (c *SysRoleController) GetSysRoleListByPage() {
-	var where map[string]string
-	//where["RoleName"] = c.Input().Get("role_name")
-	pageNum, _ := strconv.Atoi(c.Input().Get("page_num"))
-	if pageNum <= 0 {
-		pageNum = 1
-	}
-	roleList, count, _ := models.GetSysRoleListByPage(where, pageNum, 10, "role_id desc")
-	c.Data["RoleList"] = roleList
-	c.Data["RoleCount"] = count
-	c.Data["PageNum"] = pageNum
+	rowsNum := 10
+	order := map[string]string{"role_id": "desc"}
+	pageNum,_ := strconv.Atoi(c.Input().Get("page_num"))
+
+	where := make(map[string]string)
+	where["role_name"] 	= c.Input().Get("role_name")
+	where["start_time"] = c.Input().Get("start_time")
+	where["end_time"] 	= c.Input().Get("end_time")
+
+	dataList, totalRows := models.GetSysRoleListByPage(where, pageNum, rowsNum, order)
+	c.PageInfo(where,totalRows, rowsNum)
+
+	c.Data["RoleList"] = dataList
 	c.TplName = "sysrole/listSysRole.html"
 }
 
-func (c *SysRoleController) FormAddSysRole() {
-	MenuList := models.GetSysMenuList()
-	c.Data["MenuList"] = MenuList
-	c.TplName = "sysrole/formAddSysRole.html"
-}
-
-func (c *SysRoleController) AddSysRole() {
-	r := &models.SysRoleFormData{}
-	if err := c.ParseForm(r); err != nil {
-		c.DisplayJson(0, "数据解析失败", err)
-	}
-
-	if _, err := models.AddSysRole(r); err != nil {
-		c.DisplayJson(0, "保存失败", err)
-	}
-
-	c.DisplayJson(1, "保存成功", c.URLFor("SysRoleController.ListSysRole"))
-}
-
-func (c *SysRoleController) FormModifySysRole() {
+func (c *SysRoleController) FormSysRole() {
 	RoleId := c.Input().Get("role_id")
 	Id, _ := strconv.Atoi(RoleId)
 	RoleRow := models.GetSysRoleById(Id)
 
 	//获取权限
 	PowerList := models.GetSysRoleMenuActionMap(RoleId)
-	//fmt.Println(PowerList)
 
 	// 所有菜单
 	MenuList := models.GetSysMenuList()
@@ -61,11 +44,11 @@ func (c *SysRoleController) FormModifySysRole() {
 	c.Data["RoleRow"] = RoleRow
 	c.Data["MenuList"] = MenuList
 	c.Data["PowerList"] = PowerList
-	c.TplName = "sysrole/formModifySysRole.html"
+	c.TplName = "sysrole/formSysRole.html"
 }
 
 func (c *SysRoleController) SaveSysRole() {
-	r := &models.SysRoleFormData{}
+	r := &models.SysRole{}
 	if err := c.ParseForm(r); err != nil {
 		c.DisplayJson(0, "数据解析失败", err)
 	}
@@ -78,8 +61,8 @@ func (c *SysRoleController) SaveSysRole() {
 }
 
 func (c *SysRoleController) ModifySysRoleStatus() {
-	ids := c.Input().Get("role_ids")
-	roleStatus, _ := strconv.Atoi(c.Input().Get("role_status"))
+	ids := c.Input().Get("id")
+	roleStatus, _ := strconv.Atoi(c.Input().Get("status"))
 	_, err := models.ModifySysRoleStatus(ids, roleStatus)
 	if err != nil {
 		c.DisplayJson(0, "修改失败", err.Error())
@@ -88,7 +71,7 @@ func (c *SysRoleController) ModifySysRoleStatus() {
 }
 
 func (c *SysRoleController) DeleteSysRole() {
-	ids := c.Input().Get("role_ids")
+	ids := c.Input().Get("id")
 	_, err := models.DeleteSysRole(ids)
 	if err != nil {
 		c.DisplayJson(0, "修改失败", err.Error())

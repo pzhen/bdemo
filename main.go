@@ -15,7 +15,7 @@ func convertM(in int) (out int64) {
 
 func convertT(in uint) (out string) {
 	tm := time.Unix(int64(in), 0)
-	out = tm.Format("2006-01-02 03:04:05 PM")
+	out = tm.Format("2006-01-02 15:04:05")
 	return
 }
 

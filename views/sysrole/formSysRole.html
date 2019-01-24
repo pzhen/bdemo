@@ -12,7 +12,7 @@
 
 <body>
 <div class="x-body">
-    <form id="form-role-add" action="{{urlfor "SysRoleController.SaveSysRole"}}" method="post" class="layui-form layui-form-pane">
+    <form id="form-data" method="post" class="layui-form layui-form-pane">
 
         <div class="layui-form-item">
             <label for="RoleName" class="layui-form-label">
@@ -98,9 +98,11 @@
         <div class="layui-form-item" pane="">
             <label class="layui-form-label">角色状态</label>
             <div class="layui-input-block">
-                <input type="checkbox" name="RoleStatus" id="RoleStatus" lay-skin="switch" lay-text="ON|OFF" value="{{.RoleRow.RoleStatus}}" lay-filter="RoleStatus"
-                {{if eq .RoleRow.RoleStatus  1}}
-                       checked="checked"
+                <input type="checkbox" name="RoleStatus" id="RoleStatus" lay-skin="switch" lay-text="ON|OFF" value="{{.RoleRow.RoleStatus}}" lay-filter="Status"
+                {{if .RoleRow}}
+                    {{if eq .RoleRow.RoleStatus  1}}
+                           checked="checked"
+                    {{end}}
                 {{end}}
                 >
                 <div class="layui-unselect layui-form-switch" lay-skin="_switch"><em>OFF</em><i></i></div>
@@ -108,92 +110,31 @@
         </div>
 
         <div class="layui-form-item">
-            <input type="hidden" id="RoleId" value="{{.RoleRow.Id}}">
-            <button class="layui-btn" lay-submit="" lay-filter="add">提交</button>
+            <input type="hidden" id="Id" name="Id" value="{{.RoleRow.Id}}">
+            <input type="hidden" name="MenuMap" id="MenuMap" value="">
+            <input type="hidden" name="CreateTime" id="CreateTime" value="{{.RoleRow.CreateTime}}">
+            <button class="layui-btn" lay-submit="" lay-filter="sub">提交</button>
         </div>
 
     </form>
 </div>
 <script>
     layui.use(['form','layer'], function(){
-        $ = layui.jquery;
-        var form = layui.form,layer = layui.layer;
+        var form = layui.form
+        var layer = layui.layer
 
-        form.verify({
-            RoleName: function(value){
-                if(value.length <= 3){
-                    return '名称低于3个字符';
-                }
-            }
-        });
-
-        form.on('submit(add)', function(data){
-            //var json = [];
-            var str = '';
+        form.on('submit(sub)', function(data){
+            var str = ''
             $(":checkbox:checked").each(function () {
-                var current = $(this).val();
-                //var row  = {};
-                //arr = current.split("-");
-                //console.log(arr);
-                //row.MeunId = parseInt(arr[0]);
-                //row.ActionId = parseInt(arr[1]) ? parseInt(arr[1]) : parseInt("0");
-                //json.push(row);
-
-                str += current + ",";
+                var current = $(this).val()
+                str += current + ","
             });
-
-            str = str.substring(0,str.length);
-
-            //var jsonStr = JSON.stringify(json);
-            //console.log(jsonStr);
-            $.ajax({
-                url: $("#form-role-add").attr('action'),
-                data: {"RoleId":$("#RoleId").val(),"RoleName":$("#RoleName").val(), "RoleStatus":$("#RoleStatus").val(),"Intro":$("#Intro").val(),"MenuMap":str},
-                type: "post",
-                dataType: "json",
-                success: function (data) {
-
-                    var messge = "网络繁忙...";
-
-                    if(data.Message) {
-                        messge = data.Message;
-                    }
-
-                    layer.alert(messge, {icon: 6,time: 5000},function () {
-                        // 获得frame索引
-                        window.parent.location.reload();
-                        var index = parent.layer.getFrameIndex(window.name);
-                        //关闭当前frame
-                        parent.layer.close(index);
-                    });
-                },
-                error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    layer.alert(messge, {icon: 6},function () {
-                        // 获得frame索引
-                        var index = parent.layer.getFrameIndex(window.name);
-                        //关闭当前frame
-                        parent.layer.close(index);
-                    });
-                },
-                beforeSend: function () {
-                },
-                complete: function () {
-                }
-            });
-
-            return false;
-        });
-
-        form.on('switch(RoleStatus)', function(data){
-            if (data.elem.checked){
-                data.elem.value = 1
-            } else {
-                data.elem.value = 0
-            }
-        });
-    });
+            str = str.substring(0,str.length)
+            $("#MenuMap").val(str)
+            formSubmit('{{urlfor "SysRoleController.SaveSysRole"}}', $("#form-data").serialize())
+            return false
+        })
+    })
 </script>
-
 </body>
-
 </html>
