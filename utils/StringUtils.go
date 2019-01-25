@@ -56,7 +56,7 @@ func StringsSplitToSliceInt(s string, sep string) []int64 {
 		return []int64{}
 	}
 
-	p := fmt.Sprintf(`^(\d+[%s]?)+\d$`, sep)
+	p := fmt.Sprintf(`^(\d+[%s]?)+\d|\d$`, sep)
 	match,_:=regexp.MatchString(p,s)
 	if match == false {
 		return []int64{}

@@ -13,6 +13,13 @@ func init() {
 	beego.Router("/sys_user/login_form", &controllers.SysUserController{}, "Get:LoginForm")
 	beego.Router("/sys_user/login_action", &controllers.SysUserController{}, "Post:LoginAction")
 
+	beego.Router("/sys_user/list_sysuser", &controllers.SysUserController{}, "Get:GetSysUserListByPage")
+	beego.Router("/sys_user/form_sysuser", &controllers.SysUserController{}, "Get:FormSysUser")
+	beego.Router("/sys_user/save_sysuser", &controllers.SysUserController{}, "Post:SaveSysUser")
+	beego.Router("/sys_user/delete_sysuser", &controllers.SysUserController{}, "Get:DeleteSysUser")
+	beego.Router("/sys_user/modify_sysuser_status", &controllers.SysUserController{}, "Get:ModifySysUserStatus")
+
+
 	//首页
 	beego.Router("/sys_home/index", &controllers.SysHomeController{}, "Get:Index")
 	beego.Router("/sys_home/serverInfo", &controllers.SysHomeController{}, "Get:ServerInfo")

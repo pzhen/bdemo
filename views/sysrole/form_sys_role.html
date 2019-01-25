@@ -36,7 +36,7 @@
 
                 <tr>
                     <td>
-                        <input type="checkbox" value="{{$value.Id}}" lay-skin="primary" title="{{$value.MenuName}}"
+                        <input type="checkbox" name="power" value="{{$value.Id}}" lay-skin="primary" title="{{$value.MenuName}}"
                         {{range $k,$v := $.PowerList}}
                             {{if eq $v.MenuId $value.Id}}
                                 checked="checked"
@@ -54,7 +54,7 @@
                 <tr>
                     <td>
                         &nbsp;&nbsp;&nbsp;&nbsp;├
-                        <input lay-skin="primary" type="checkbox" value="{{$value.Id}}" title="{{$value.MenuName}}"
+                        <input lay-skin="primary" name="power" type="checkbox" value="{{$value.Id}}" title="{{$value.MenuName}}"
                         {{range $k,$v := $.PowerList}}
                         {{if eq $v.MenuId $value.Id}}
                                checked="checked"
@@ -65,7 +65,7 @@
                     <td>
                         <div class="layui-input-block">
                         {{range $k,$v := $value.FuncsInfo}}
-                            <input lay-skin="primary" type="checkbox" value="{{$value.Id}}-{{$v.FuncId}}" title="{{$v.FuncDesc}}"
+                            <input lay-skin="primary" name="power" type="checkbox" value="{{$value.Id}}-{{$v.FuncId}}" title="{{$v.FuncDesc}}"
                             {{range $kk,$vv := $.PowerList}}
                                 {{if eq $vv.MenuId $value.Id}}
                                 {{if eq $vv.ActionId $v.FuncId}}
@@ -126,11 +126,11 @@
         form.on('submit(sub)', function(data){
             var loading = layer.load(1, {shade: [0.1,'#fff']});
             var str = ''
-            $(":checkbox:checked").each(function () {
+            $("input[name='power']:checked").each(function () {
                 var current = $(this).val()
                 str += current + ","
             });
-            str = str.substring(0,str.length)
+            str = str.substring(0,str.length-1)
             $("#MenuMap").val(str)
             formSubmit('{{urlfor "SysRoleController.SaveSysRole"}}', $("#form-data").serialize(),"alert","reload")
             layer.close(loading);

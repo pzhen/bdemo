@@ -4,6 +4,8 @@ import (
 	"bdemo/models"
 	"bdemo/utils"
 	"encoding/json"
+	"strconv"
+	"fmt"
 )
 
 type SysUserController struct {
@@ -22,6 +24,50 @@ func (c *SysUserController) LogOut() {
 	c.DelSession("UserMenu")
 	c.DelSession("UserSession")
 	c.DisplayJson(1,"logout success",c.URLFor("SysUserController.LoginForm"))
+}
+
+func (c *SysUserController) FormSysUser() {
+	userId := c.Input().Get("user_id")
+	Id, _ := strconv.Atoi(userId)
+	UserRow := models.GetSysUserRowById(Id)
+
+	roleIdArr := utils.StringsSplitToSliceInt(UserRow.RoleId, ",")
+	roleList := models.GetSysRoleList()
+
+	c.Data["RoleList"] = roleList
+	c.Data["RoleIdArr"] = roleIdArr
+	c.Data["DataRow"] = UserRow
+	c.TplName = "sysuser/form_sys_user.html"
+}
+
+func (c *SysUserController) GetSysUserListByPage() {
+	rowsNum := 10
+	order := map[string]string{"user_id": "desc"}
+	pageNum,_ := strconv.Atoi(c.Input().Get("page_num"))
+
+	where := make(map[string]string)
+	where["user_name"] 	= c.Input().Get("user_name")
+	where["start_time"] = c.Input().Get("start_time")
+	where["end_time"] 	= c.Input().Get("end_time")
+
+	dataList, totalRows := models.GetSysUserListByPage(where, pageNum, rowsNum, order)
+	c.PageInfo(where,totalRows, rowsNum)
+
+	c.Data["DataList"] = dataList
+	c.TplName = "sysuser/list_sys_user.html"
+}
+
+func (c *SysUserController) SaveSysUser() {
+	r := &models.SysUser{}
+	if err := c.ParseForm(r); err != nil {
+		c.DisplayJson(0, "数据解析失败", err)
+	}
+
+	if _, err := models.SaveSysUser(r); err != nil {
+		c.DisplayJson(0, "保存失败", err)
+	}
+
+	c.DisplayJson(1, "保存成功", c.URLFor("SysUserController.GetSysUserListByPage"))
 }
 
 func (c *SysUserController) LoginAction() {
@@ -61,5 +107,25 @@ func (c *SysUserController) LoginAction() {
 	} else {
 		c.DisplayStatus(0, "账号不存在", "")
 	}
+}
+
+func (c *SysUserController) ModifySysUserStatus() {
+	ids := c.Input().Get("id")
+	fmt.Println("######################",ids)
+	status, _ := strconv.Atoi(c.Input().Get("status"))
+	_, err := models.ModifySysUserStatus(ids, status)
+	if err != nil {
+		c.DisplayJson(0, "修改失败", err.Error())
+	}
+	c.DisplayJson(1, "修改成功", c.URLFor("SysUserController.GetSysUserListByPage"))
+}
+
+func (c *SysUserController) DeleteSysUser() {
+	ids := c.Input().Get("id")
+	_, err := models.DeleteSysUser(ids)
+	if err != nil {
+		c.DisplayJson(0, "修改失败", err.Error())
+	}
+	c.DisplayJson(1, "删除成功", c.URLFor("SysUserController.GetSysUserListByPage"))
 }
 

@@ -42,12 +42,17 @@ func GetSysRoleById(id int) *SysRole {
 
 //获取角色对应菜单以及菜单下方法
 func GetSysRoleMenuActionMap(roleIds string) []SysRoleMenuMap {
-	data := make([]SysRoleMenuMap, 0)
-	roleIdArr := utils.StringsSplitToSliceInt(roleIds, ",")
-	if len(roleIdArr) == 0 {
+	data  := make([]SysRoleMenuMap, 0)
+	idArr := make([]int,0)
+	for _, v := range utils.StringsSplitToSliceInt(roleIds, ",") {
+		if row := GetSysRoleById(int(v)); row.RoleStatus == 1 {
+			idArr = append(idArr, int(v))
+		}
+	}
+	if len(idArr) == 0 {
 		return data
 	}
-	orm.NewOrm().QueryTable(Table_Sys_Role_Menu_Map).Filter("role_id__in", roleIdArr).All(&data)
+	orm.NewOrm().QueryTable(Table_Sys_Role_Menu_Map).Filter("role_id__in", idArr).All(&data)
 	return data
 }
 
@@ -151,6 +156,19 @@ func GetSysRoleListByPage(where map[string]string, pageNum int, rowsNum int, ord
 	//获取数量
 	totalRows := GetSysRoleCount(where)
 	return data, totalRows
+}
+
+//获取所有角色
+func GetSysRoleList() []*SysRole {
+	data := make([]*SysRole, 0)
+	qb, _ := orm.NewQueryBuilder("mysql")
+	qb.Select("*")
+	qb.From(Table_Sys_Role)
+	qb.Where("role_status = 1")
+	qb.OrderBy("role_id")
+	qb.Desc()
+	orm.NewOrm().Raw(qb.String()).QueryRows(&data)
+	return data
 }
 
 //删除角色
