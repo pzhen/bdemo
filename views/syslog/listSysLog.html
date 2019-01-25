@@ -36,7 +36,7 @@
     </div>
 
     <xblock>
-        <button class="layui-btn layui-btn-danger" onclick="deleteDataByBatch()"><i class="layui-icon layui-icon-delete"></i>批量删除</button>
+        <button class="layui-btn layui-btn-danger" onclick="deleteDataByBatch('{{urlfor "SysLogController.DeleteSysLog"}}')"><i class="layui-icon layui-icon-delete"></i>批量删除</button>
         <span class="x-right" style="line-height:40px">共有数据：{{.PageInfo.TotalRows}} 条</span>
     </xblock>
 
@@ -72,7 +72,7 @@
                 </td>
                 <td>{{$value.CreateTime | convertt}}</td>
                 <td class="td-manage">
-                    <a title="删除" onclick="deleteDataByOne(this,'{{$value.Id}}')" href="javascript:;">
+                    <a title="删除" onclick="deleteDataByOne('{{urlfor "SysLogController.DeleteSysLog"}}',this,'{{$value.Id}}')" href="javascript:;">
                         <i class="layui-icon">&#xe640;</i>
                     </a>
                 </td>
@@ -85,8 +85,6 @@
 
 </div>
 <script>
-    //批量删除地址
-    var deleteUrl = '{{urlfor "SysLogController.DeleteSysLog"}}';
 
     //分页
     layui.use('laypage', function () {

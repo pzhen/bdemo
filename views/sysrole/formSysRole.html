@@ -124,6 +124,7 @@
         var layer = layui.layer
 
         form.on('submit(sub)', function(data){
+            var loading = layer.load(1, {shade: [0.1,'#fff']});
             var str = ''
             $(":checkbox:checked").each(function () {
                 var current = $(this).val()
@@ -131,7 +132,8 @@
             });
             str = str.substring(0,str.length)
             $("#MenuMap").val(str)
-            formSubmit('{{urlfor "SysRoleController.SaveSysRole"}}', $("#form-data").serialize())
+            formSubmit('{{urlfor "SysRoleController.SaveSysRole"}}', $("#form-data").serialize(),"alert","reload")
+            layer.close(loading);
             return false
         })
     })

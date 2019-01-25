@@ -57,7 +57,7 @@ func (c *SysRoleController) SaveSysRole() {
 		c.DisplayJson(0, "保存失败", err)
 	}
 
-	c.DisplayJson(1, "保存成功", c.URLFor("SysRoleController.ListSysRole"))
+	c.DisplayJson(1, "保存成功", c.URLFor("SysRoleController.GetSysRoleListByPage"))
 }
 
 func (c *SysRoleController) ModifySysRoleStatus() {
@@ -67,7 +67,7 @@ func (c *SysRoleController) ModifySysRoleStatus() {
 	if err != nil {
 		c.DisplayJson(0, "修改失败", err.Error())
 	}
-	c.DisplayJson(1, "修改成功", c.URLFor("SysRoleController.ListSysRole"))
+	c.DisplayJson(1, "修改成功", c.URLFor("SysRoleController.GetSysRoleListByPage"))
 }
 
 func (c *SysRoleController) DeleteSysRole() {
@@ -76,5 +76,5 @@ func (c *SysRoleController) DeleteSysRole() {
 	if err != nil {
 		c.DisplayJson(0, "修改失败", err.Error())
 	}
-	c.DisplayJson(1, "删除成功", c.URLFor("SysRoleController.ListSysRole"))
+	c.DisplayJson(1, "删除成功", c.URLFor("SysRoleController.GetSysRoleListByPage"))
 }

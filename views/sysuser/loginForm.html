@@ -15,42 +15,29 @@
     <div class="message">{{.AppName}}.{{.Version}}-管理登录</div>
     <div id="darkbannerwrap"></div>
 
-    <form method="post" class="layui-form" >
-        <input id="user_name" name="user_name" placeholder="用户名"  type="text" lay-verify="required" class="layui-input" >
+    <form method="post" id="form-data" class="layui-form" >
+        <input id="username" name="username" placeholder="用户名"  type="text" lay-verify="required" class="layui-input" >
         <hr class="hr15">
         <input id="password" name="password" lay-verify="required" placeholder="密码"  type="password" class="layui-input">
         <hr class="hr15">
-        <input value="登录" lay-submit lay-filter="login" style="width:100%;" type="submit">
-        <hr class="hr20" >
+        <input value="登录" lay-submit lay-filter="sub" style="width:100%;" type="submit">
+        <hr class="hr20">
     </form>
 </div>
 
 <script>
-    $(function  () {
-        layui.use('form', function(){
-            var form = layui.form;
-            //监听提交
-            form.on('submit(login)', function(data){
-                //
-                var loading = layer.load(1, {shade: [0.1,'#fff']});
-                $.ajax({
-                    type: "post",
-                    url: "{{urlfor "SysUserController.LoginAction"}}",
-                    //data: JSON.stringify(data.field),
-                    data: {"username":$("#user_name").val(),"password":$("#password").val()},
-                    success: function (data) {
-                        layer.msg(data.Message,{icon:1,time:1000},function () {
-                            if(data.Code > 0){
-                                location.href = data.Data;
-                            }else{
-                                layer.close(loading);
-                            }
-                        });
-                    }
-                });
-                return false;
-            });
-        });
+    $(function () {
+        layui.use('form', function () {
+            var form = layui.form
+            var layer = layui.layer
+
+            form.on('submit(sub)', function (data) {
+                var loading = layer.load(1, {shade: [0.1, '#fff']});
+                formSubmit('{{urlfor "SysUserController.LoginAction"}}', $("#form-data").serialize(), "msg", "href")
+                layer.close(loading);
+                return false
+            })
+        })
     })
 </script>
 </body>

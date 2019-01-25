@@ -38,9 +38,9 @@
 
         <button class="layui-btn" onclick="x_admin_show('添加角色','{{urlfor "SysRoleController.FormSysRole"}}')"><i class="layui-icon"></i>添加</button>
 
-        <button class="layui-btn" style="background-color: #5FB878" onclick="modifyStatusByBatch(1)"><i class="layui-icon layui-icon-play"></i>批量开启</button>
-        <button class="layui-btn layui-bg-orange" onclick="modifyStatusByBatch(0)"><i class="layui-icon layui-icon-pause"></i>批量关闭</button>
-        <button class="layui-btn layui-btn-danger" onclick="deleteDataByBatch()"><i class="layui-icon layui-icon-delete"></i>批量删除</button>
+        <button class="layui-btn" style="background-color: #5FB878" onclick="modifyStatusByBatch('{{urlfor "SysRoleController.ModifySysRoleStatus"}}',1)"><i class="layui-icon layui-icon-play"></i>批量开启</button>
+        <button class="layui-btn layui-bg-orange" onclick="modifyStatusByBatch('{{urlfor "SysRoleController.ModifySysRoleStatus"}}',0)"><i class="layui-icon layui-icon-pause"></i>批量关闭</button>
+        <button class="layui-btn layui-btn-danger" onclick="deleteDataByBatch('{{urlfor "SysRoleController.DeleteSysRole"}}')"><i class="layui-icon layui-icon-delete"></i>批量删除</button>
 
         <span class="x-right" style="line-height:40px">共有数据：{{.PageInfo.TotalRows}} 条</span>
     </xblock>
@@ -85,11 +85,11 @@
                 <td class="td-manage">
 
                     {{if eq $value.RoleStatus 1}}
-                        <a onclick="modifyStatusByOne(this,'{{$value.Id}}','0')" href="javascript:;"  title="关闭">
+                        <a onclick="modifyStatusByOne('{{urlfor "SysRoleController.ModifySysRoleStatus"}}',this,'{{$value.Id}}','0')" href="javascript:;"  title="关闭">
                             <i class="layui-icon layui-icon-pause"></i>
                         </a>
                     {{else}}
-                        <a onclick="modifyStatusByOne(this,'{{$value.Id}}','1')" href="javascript:;"  title="启用">
+                        <a onclick="modifyStatusByOne('{{urlfor "SysRoleController.ModifySysRoleStatus"}}',this,'{{$value.Id}}','1')" href="javascript:;"  title="启用">
                             <i class="layui-icon layui-icon-play"></i>
                         </a>
                     {{end}}
@@ -97,7 +97,7 @@
                     <a title="编辑"  onclick="x_admin_show('编辑角色','{{urlfor "SysRoleController.FormSysRole" "role_id" $value.Id}}')" href="javascript:;">
                         <i class="layui-icon">&#xe642;</i>
                     </a>
-                    <a title="删除" onclick="deleteDataByOne(this,'{{$value.Id}}')" href="javascript:;">
+                    <a title="删除" onclick="deleteDataByOne('{{urlfor "SysRoleController.DeleteSysRole"}}',this,'{{$value.Id}}')" href="javascript:;">
                         <i class="layui-icon">&#xe640;</i>
                     </a>
                 </td>
@@ -110,9 +110,6 @@
 
 </div>
 <script>
-
-    var modifyStatusUrl = '{{urlfor "SysRoleController.ModifySysRoleStatus"}}';
-    var deleteUrl = '{{urlfor "SysRoleController.DeleteSysRole"}}';
     //分页
     layui.use('laypage', function () {
         var laypage = layui.laypage;
