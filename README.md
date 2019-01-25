@@ -2,6 +2,8 @@
 
 1.时间比较久远了,现在传上Git上.先看下效果图.
 
+最近对代码进行了重构,增加了用户添加等功能
+
 ![Image 1](https://raw.githubusercontent.com/pzhen/bdemo/master/doc/bdemo-1.png)
 
 ![Image 2](https://raw.githubusercontent.com/pzhen/bdemo/master/doc/bdemo-2.png)
