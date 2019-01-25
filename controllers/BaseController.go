@@ -24,6 +24,7 @@ type SysBaseController struct {
 //开放地址
 var openAction = []string{
 	"SysUserController.LoginForm",
+	"SysUserController.LogOut",
 	"SysUserController.LoginAction",
 }
 

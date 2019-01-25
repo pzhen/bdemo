@@ -27,5 +27,5 @@ func (c *SysHomeController) ServerInfo() {
 	c.Data["UploadLimit"] 	= beego.AppConfig.String("uploadlimit")
 	c.Data["MySqlVersion"] 	= beego.AppConfig.String("mysqlversion")
 
-	c.TplName = "syshome/serverinfo.html"
+	c.TplName = "syshome/server_info.html"
 }

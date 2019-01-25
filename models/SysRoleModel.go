@@ -70,7 +70,7 @@ func SaveSysRole(m *SysRole) (id int64, err error) {
 	} else {
 		roleInfo.CreateTime = uint(time.Now().Unix())
 		id, err = o.Insert(&roleInfo)
-		m.Id = int(id)
+		roleInfo.Id = int(id)
 	}
 
 	//关系入库
@@ -80,7 +80,7 @@ func SaveSysRole(m *SysRole) (id int64, err error) {
 			continue
 		}
 		insert := SysRoleMenuMap{}
-		insert.Id = m.Id
+		insert.Id = roleInfo.Id
 		if strings.Contains(v, "-") == true {
 			mapArr := strings.Split(v, "-")
 			insert.MenuId, _ = strconv.Atoi(mapArr[0])

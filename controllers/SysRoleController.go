@@ -27,7 +27,7 @@ func (c *SysRoleController) GetSysRoleListByPage() {
 	c.PageInfo(where,totalRows, rowsNum)
 
 	c.Data["RoleList"] = dataList
-	c.TplName = "sysrole/listSysRole.html"
+	c.TplName = "sysrole/list_sys_role.html"
 }
 
 func (c *SysRoleController) FormSysRole() {
@@ -44,7 +44,7 @@ func (c *SysRoleController) FormSysRole() {
 	c.Data["RoleRow"] = RoleRow
 	c.Data["MenuList"] = MenuList
 	c.Data["PowerList"] = PowerList
-	c.TplName = "sysrole/formSysRole.html"
+	c.TplName = "sysrole/form_sys_role.html"
 }
 
 func (c *SysRoleController) SaveSysRole() {

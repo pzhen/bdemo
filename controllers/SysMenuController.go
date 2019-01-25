@@ -14,10 +14,10 @@ func (c *SysMenuController) Prepare() {
 	c.SysBaseController.Prepare()
 }
 
-func (c *SysMenuController) ListSysMenu() {
+func (c *SysMenuController) GetSysMenuList() {
 	menuList := models.GetSysMenuList()
 	c.Data["MenuList"] = menuList
-	c.TplName = "sysmenu/listSysMenu.html"
+	c.TplName = "sysmenu/list_sys_menu.html"
 }
 
 
@@ -28,7 +28,7 @@ func (c *SysMenuController) FormSysMenu() {
 	MenuList := models.GetSysMenuList()
 	c.Data["MenuRow"] = MenuRow
 	c.Data["MenuList"] = MenuList
-	c.TplName = "sysmenu/formSysMenu.html"
+	c.TplName = "sysmenu/form_sys_menu.html"
 }
 
 func (c *SysMenuController) SaveSysMenu() {
@@ -39,7 +39,7 @@ func (c *SysMenuController) SaveSysMenu() {
 	if _,err := models.SaveSysMenu(m); err != nil {
 		c.DisplayJson(0, "保存失败", err)
 	}
-	c.DisplayJson(1, "保存成功", c.URLFor("SysMenuController.ListSysMenu"))
+	c.DisplayJson(1, "保存成功", c.URLFor("SysMenuController.GetSysMenuList"))
 }
 
 func (c *SysMenuController) ModifySysMenuStatus() {
@@ -49,7 +49,7 @@ func (c *SysMenuController) ModifySysMenuStatus() {
 	if err != nil {
 		c.DisplayJson(0, "修改失败", err.Error())
 	}
-	c.DisplayJson(1, "修改成功", c.URLFor("SysMenuController.ListSysMenu"))
+	c.DisplayJson(1, "修改成功", c.URLFor("SysMenuController.GetSysMenuList"))
 }
 
 func (c *SysMenuController) DeleteSysMenu() {
@@ -58,5 +58,5 @@ func (c *SysMenuController) DeleteSysMenu() {
 	if err != nil {
 		c.DisplayJson(0, "修改失败", err.Error())
 	}
-	c.DisplayJson(1, "删除成功", c.URLFor("SysMenuController.ListSysMenu"))
+	c.DisplayJson(1, "删除成功", c.URLFor("SysMenuController.GetSysMenuList"))
 }

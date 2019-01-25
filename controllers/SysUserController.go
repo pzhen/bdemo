@@ -15,7 +15,7 @@ func (c *SysUserController) Prepare() {
 }
 
 func (c *SysUserController) LoginForm() {
-	c.TplName = "sysuser/loginForm.html"
+	c.TplName = "sysuser/login_form.html"
 }
 
 func (c *SysUserController) LogOut() {

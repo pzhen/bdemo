@@ -104,24 +104,7 @@
 <script>
     function logout(url) {
         layer.confirm('确认要退出吗？',{btn:['确定','取消']},function(index){
-            $.ajax({
-                url: decodeURI(url),
-                data: {},
-                type: "get",
-                dataType: "json",
-                success: function (data) {
-                    var messge = "网络繁忙...";
-                    if(data.Message) {
-                        messge = data.Message;
-                    }
-
-                    layer.msg(messge,{icon:1,time:1000},function () {
-                        if(data.Code > 0){
-                            window.location.href=data.Data;
-                        }
-                    });
-                }
-            });
+            formSubmit(url, {}, "msg", "href")
             return false;
         });
     }

@@ -27,7 +27,7 @@ func (c *SysLogController) GetSysLogListByPage() {
 	c.PageInfo(where,totalRows, rowsNum)
 
 	c.Data["DataList"] 	= dataList
-	c.TplName = "syslog/listSysLog.html"
+	c.TplName = "syslog/list_sys_log.html"
 }
 
 func (c *SysLogController) DeleteSysLog() {
