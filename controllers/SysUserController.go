@@ -5,7 +5,6 @@ import (
 	"bdemo/utils"
 	"encoding/json"
 	"strconv"
-	"fmt"
 )
 
 type SysUserController struct {
@@ -111,7 +110,6 @@ func (c *SysUserController) LoginAction() {
 
 func (c *SysUserController) ModifySysUserStatus() {
 	ids := c.Input().Get("id")
-	fmt.Println("######################",ids)
 	status, _ := strconv.Atoi(c.Input().Get("status"))
 	_, err := models.ModifySysUserStatus(ids, status)
 	if err != nil {
