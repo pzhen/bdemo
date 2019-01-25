@@ -20,33 +20,15 @@ func (c *SysMenuController) ListSysMenu() {
 	c.TplName = "sysmenu/listSysMenu.html"
 }
 
-func (c *SysMenuController) FormAddSysMenu() {
-	MenuList := models.GetSysMenuList()
-	c.Data["MenuList"] = MenuList
-	c.TplName = "sysmenu/formAddSysMenu.html"
-}
 
-func (c *SysMenuController) AddSysMenu() {
-	m := &models.SysMenu{}
-	if err := c.ParseForm(m); err != nil {
-		c.DisplayJson(0, "数据解析失败", err)
-	}
-
-	if _, err := models.AddSysMenu(m); err != nil {
-		c.DisplayJson(0, "保存失败", err)
-	}
-
-	c.DisplayJson(1, "保存成功", c.URLFor("SysMenuController.ListSysMenu"))
-}
-
-func (c *SysMenuController) FormModifySysMenu() {
+func (c *SysMenuController) FormSysMenu() {
 	MenuId := c.Input().Get("menu_id")
 	Id, _ := strconv.Atoi(MenuId)
 	MenuRow := models.GetSysMenuById(Id)
 	MenuList := models.GetSysMenuList()
 	c.Data["MenuRow"] = MenuRow
 	c.Data["MenuList"] = MenuList
-	c.TplName = "sysmenu/formModifySysMenu.html"
+	c.TplName = "sysmenu/formSysMenu.html"
 }
 
 func (c *SysMenuController) SaveSysMenu() {
@@ -54,15 +36,15 @@ func (c *SysMenuController) SaveSysMenu() {
 	if err := c.ParseForm(m); err != nil {
 		c.DisplayJson(0, "数据解析失败", err)
 	}
-	if err := models.SaveSysMenu(m); err != nil {
+	if _,err := models.SaveSysMenu(m); err != nil {
 		c.DisplayJson(0, "保存失败", err)
 	}
 	c.DisplayJson(1, "保存成功", c.URLFor("SysMenuController.ListSysMenu"))
 }
 
 func (c *SysMenuController) ModifySysMenuStatus() {
-	ids := c.Input().Get("menu_ids")
-	menuStatus, _ := strconv.Atoi(c.Input().Get("menu_status"))
+	ids := c.Input().Get("id")
+	menuStatus, _ := strconv.Atoi(c.Input().Get("status"))
 	_, err := models.ModifySysMenuStatus(ids, menuStatus)
 	if err != nil {
 		c.DisplayJson(0, "修改失败", err.Error())
@@ -71,7 +53,7 @@ func (c *SysMenuController) ModifySysMenuStatus() {
 }
 
 func (c *SysMenuController) DeleteSysMenu() {
-	ids := c.Input().Get("menu_ids")
+	ids := c.Input().Get("id")
 	_, err := models.DeleteSysMenu(ids)
 	if err != nil {
 		c.DisplayJson(0, "修改失败", err.Error())

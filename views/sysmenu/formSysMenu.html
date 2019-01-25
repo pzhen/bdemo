@@ -12,14 +12,14 @@
 
 <body>
 <div class="x-body">
-    <form class="layui-form" id="form-menu-add" action="{{urlfor "SysMenuController.SaveSysMenu"}}">
+    <form class="layui-form" id="form-data" action="">
 
         <div class="layui-form-item">
             <label for="MenuName" class="layui-form-label">
                 <span class="x-red">*</span>菜单名字
             </label>
             <div class="layui-input-inline">
-                <input type="text" id="MenuName" name="MenuName" value="" required="required" lay-verify="MenuName" autocomplete="off" class="layui-input" width="500px">
+                <input type="text" id="MenuName" name="MenuName" value="{{.MenuRow.MenuName}}" required="required" lay-verify="MenuName" autocomplete="off" class="layui-input" width="500px">
             </div>
         </div>
 
@@ -30,14 +30,14 @@
             <div class="layui-input-inline">
                 <select id="MenuRootid" name="MenuRootid" class="valid">
                     <option value="0">请选择...</option>
-                {{range $key,$value := .MenuList}}
-                {{if eq $value.MenuLevel 1}}
-                    <option value="{{$value.Id}}" >{{$value.MenuName}}</option>
-                {{else}}
-                    <option value="{{$value.Id}}" >&nbsp;&nbsp;&nbsp;&nbsp;
-                        ├{{$value.MenuName}}</option>
-                {{end}}
-                {{end}}
+                    {{range $key,$value := .MenuList}}
+                        {{if eq $value.MenuLevel 1}}
+                           <option value="{{$value.Id}}" {{if eq $.MenuRow.MenuRootid $value.Id}} selected="selected" {{end}} >{{$value.MenuName}}</option>
+                        {{else}}
+                           <option value="{{$value.Id}}" {{if eq $.MenuRow.MenuRootid $value.Id}} selected="selected" {{end}} >&nbsp;&nbsp;&nbsp;&nbsp;
+                               ├{{$value.MenuName}}</option>
+                        {{end}}
+                    {{end}}
                 </select>
             </div>
 
@@ -50,7 +50,7 @@
             </label>
             <div class="layui-input-inline">
                 <input type="text" id="MenuUrl" name="MenuUrl" required="" lay-verify=""
-                       autocomplete="off" class="layui-input" value="" placeholder="">
+                       autocomplete="off" class="layui-input" value="{{$.MenuRow.MenuUrl}}" placeholder="">
             </div>
             <div class="layui-form-mid layui-word-aux">例: SysMenuController.ListSysMenu</div>
         </div>
@@ -61,7 +61,7 @@
             </label>
             <div class="layui-input-inline">
                 <input type="text" id="MenuLevel" name="MenuLevel" required="" lay-verify=""
-                       autocomplete="off" class="layui-input" value="" placeholder="">
+                       autocomplete="off" class="layui-input" value="{{$.MenuRow.MenuLevel}}" placeholder="">
             </div>
             <div class="layui-form-mid layui-word-aux"></div>
         </div>
@@ -73,7 +73,7 @@
             </label>
             <div class="layui-input-inline">
                 <input type="text" id="MenuIcon" name="MenuIcon" required="" lay-verify=""
-                       autocomplete="off" class="layui-input" value="">
+                       autocomplete="off" class="layui-input" value="{{$.MenuRow.MenuIcon}}">
             </div>
             <div class="layui-form-mid layui-word-aux">顶级菜单图标</div>
         </div>
@@ -83,7 +83,7 @@
                 菜单方法
             </label>
             <div class="layui-input-block">
-                <textarea placeholder="格式为Json" rows="15" id="MenuFuncs" name="MenuFuncs" class="layui-textarea"></textarea>
+                <textarea placeholder="格式为Json" rows="15" id="MenuFuncs" name="MenuFuncs" class="layui-textarea">{{$.MenuRow.MenuFuncs}}</textarea>
                 <pre class="layui-code">
 [
   {
@@ -94,7 +94,6 @@
 ]
             </pre>
             </div>
-
         </div>
 
 
@@ -103,87 +102,40 @@
                 菜单状态
             </label>
             <div class="layui-input-inline layui-form-checkbox" style="border: 0px;padding-top: 3px;">
-                <input type="checkbox" name="MenuStatus" id="MenuStatus" lay-skin="switch" lay-text="ON|OFF" value="" lay-filter="MenuStatus">
+                <input type="checkbox" name="MenuStatus" id="MenuStatus" lay-skin="switch" lay-text="ON|OFF"
+                {{if eq $.MenuRow.MenuStatus  1}}
+                 checked="checked"
+                {{end}}
+                 value="{{$.MenuRow.MenuStatus}}" lay-filter="Status"
+                >
                 <div class="layui-unselect layui-form-switch" lay-skin="_switch"><em>OFF</em><i></i></div>
             </div>
         </div>
 
-        <input type="hidden" value="" id="Id" name="Id">
+        <input type="hidden" value="{{$.MenuRow.Id}}" id="Id" name="Id">
 
         <div class="layui-form-item">
             <label for="L_repass" class="layui-form-label">
             </label>
-            <button  class="layui-btn" lay-filter="add" lay-submit="">
+            <button  class="layui-btn" lay-filter="sub" lay-submit="">
                 提交
             </button>
         </div>
 
-    </form>
+</form>
 </div>
 <script>
     layui.use(['form','layer'], function(){
-        $ = layui.jquery;
-        var form = layui.form,layer = layui.layer;
+        var form = layui.form
+        var layer = layui.layer
 
-        //自定义验证规则
-        form.verify({
-            MenuName: function(value){
-                if(value.length < 4){
-                    return '菜单至少得4个字符啊';
-                }
-            }
-        });
-
-        //监听提交
-        form.on('submit(add)', function(data){
-
-            $.ajax({
-                url: $("#form-menu-add").attr('action'),
-                data: $("#form-menu-add").serialize(),
-                type: "post",
-                dataType: "json",
-                success: function (data) {
-
-                    var messge = "网络繁忙...";
-
-                    if(data.Message) {
-                        messge = data.Message;
-                    }
-
-                    layer.alert(messge, {icon: 6,time: 5000},function () {
-                        // 获得frame索引
-                        window.parent.location.reload();
-                        var index = parent.layer.getFrameIndex(window.name);
-                        //关闭当前frame
-                        parent.layer.close(index);
-                    });
-                },
-                error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    layer.alert(messge, {icon: 6},function () {
-                        // 获得frame索引
-                        var index = parent.layer.getFrameIndex(window.name);
-                        //关闭当前frame
-                        parent.layer.close(index);
-                    });
-                },
-                beforeSend: function () {
-                },
-                complete: function () {
-                }
-            });
-
-            return false;
-        });
-
-        form.on('switch(MenuStatus)', function(data){
-            if (data.elem.checked){
-                data.elem.value = 1
-            } else {
-                data.elem.value = 0
-            }
-        });
-
-    });
+        form.on('submit(sub)', function(data){
+            var loading = layer.load(1, {shade: [0.1,'#fff']});
+            formSubmit('{{urlfor "SysMenuController.SaveSysMenu"}}', $("#form-data").serialize(),"alert","reload")
+            layer.close(loading);
+            return false
+        })
+    })
 </script>
 
 </body>

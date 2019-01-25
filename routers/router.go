@@ -19,10 +19,8 @@ func init() {
 
 	// 菜单
 	beego.Router("/sys_menu/list_sysmenu", &controllers.SysMenuController{}, "Get:ListSysMenu")
-	beego.Router("/sys_menu/form_add_sysmenu", &controllers.SysMenuController{}, "Get:FormAddSysMenu")
-	beego.Router("/sys_menu/form_modify_sysmenu", &controllers.SysMenuController{}, "Get:FormModifySysMenu")
+	beego.Router("/sys_menu/form_sysmenu", &controllers.SysMenuController{}, "Get:FormSysMenu")
 	beego.Router("/sys_menu/save_sysmenu", &controllers.SysMenuController{}, "Post:SaveSysMenu")
-	beego.Router("/sys_menu/add_sysmenu", &controllers.SysMenuController{}, "Post:AddSysMenu")
 	beego.Router("/sys_menu/modify_sysmenu_status", &controllers.SysMenuController{}, "Get:ModifySysMenuStatus")
 	beego.Router("/sys_menu/delete_sysmenu", &controllers.SysMenuController{}, "Get:DeleteSysMenu")
 

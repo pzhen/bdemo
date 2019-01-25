@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"errors"
 	"strconv"
 
@@ -60,6 +59,14 @@ func GetSysMenuList() []*SysMenu {
 	return data
 }
 
+func GetSysMenuById(id int) *SysMenu {
+	data := new(SysMenu)
+	if id > 0 {
+		orm.NewOrm().QueryTable(Table_Sys_Menu).Filter("menu_id", id).One(data)
+	}
+	return data
+}
+
 func AddSysMenu(m *SysMenu) (id int64, err error) {
 	o := orm.NewOrm()
 	id, err = o.Insert(m)
@@ -73,56 +80,55 @@ func AddSysMenu(m *SysMenu) (id int64, err error) {
 	return
 }
 
-func GetSysMenuById(id int) *SysMenu {
-	data := new(SysMenu)
-	if id > 0 {
-		orm.NewOrm().QueryTable(Table_Sys_Menu).Filter("menu_id", id).One(data)
-	}
-	return data
-}
-
-func SaveSysMenu(m *SysMenu) (err error) {
+func SaveSysMenu(m *SysMenu) (int64, error) {
 	o := orm.NewOrm()
-	v := SysMenu{Id: m.Id}
-
-	if m.MenuRootid > 0 {
-		m.MenuPath = "-" + strconv.Itoa(m.MenuRootid) + "-" + strconv.Itoa(m.Id) + "-"
+	if m.Id > 0 {
+		if m.MenuRootid > 0 {
+			m.MenuPath = "-" + strconv.Itoa(m.MenuRootid) + "-" + strconv.Itoa(m.Id) + "-"
+		} else {
+			m.MenuPath = "-" + strconv.Itoa(m.Id) + "-"
+		}
+		if err := o.Read(&SysMenu{Id: m.Id}); err == nil {
+			if num, err := o.Update(m) ;err != nil {
+				return 0, err
+			} else {
+				return num, nil
+			}
+		} else {
+			return 0, err
+		}
 	} else {
-		m.MenuPath = "-" + strconv.Itoa(m.Id) + "-"
-	}
-
-	if err = o.Read(&v); err == nil {
-		var num int64
-		if num, err = o.Update(m); err == nil {
-			fmt.Println("Number of records updated in database:", num)
+		if id, err := o.Insert(m); err == nil {
+			if m.MenuRootid > 0 {
+				m.MenuPath = "-" + strconv.Itoa(m.MenuRootid) + "-" + strconv.Itoa(int(id)) + "-"
+			} else {
+				m.MenuPath = "-" + strconv.Itoa(int(id)) + "-"
+			}
+			o.Update(m, "MenuPath")
+			return id, nil
+		} else {
+			return 0, err
 		}
 	}
-	return
 }
 
 //删除菜单
-func DeleteSysMenu(ids string) (num int64, err error) {
-	s, i := utils.GetWhereInSqlByStrId(ids)
-	if len(i) == 0 {
+func DeleteSysMenu(ids string) (int64, error) {
+	idArr := utils.StringsSplitToSliceInt(ids, ",")
+	if len(idArr) == 0 {
 		return 0, errors.New("参数错误")
 	}
-	o := orm.NewOrm()
-	res, err := o.Raw("DELETE FROM sys_menu WHERE menu_id in ("+s+")", i).Exec()
-	num, _ = res.RowsAffected()
-	return num, err
+	return orm.NewOrm().QueryTable(Table_Sys_Menu).Filter("menu_id__in", idArr).Delete()
 }
 
 //修改菜单状态
-func ModifySysMenuStatus(ids string, menuStatus int) (num int64, err error) {
-	s, i := utils.GetWhereInSqlByStrId(ids)
-	if len(i) == 0 {
-		err = errors.New("参数错误")
-		return 0, err
+func ModifySysMenuStatus(ids string, status int) (int64, error) {
+	idArr := utils.StringsSplitToSliceInt(ids, ",")
+	if len(idArr) == 0 {
+		return 0, errors.New("参数错误")
 	}
-	o := orm.NewOrm()
-	res, err := o.Raw("UPDATE sys_menu SET menu_status = ? WHERE menu_id in ("+s+")", menuStatus, i).Exec()
-	num, _ = res.RowsAffected()
-	return num, err
+	return orm.NewOrm().QueryTable(Table_Sys_Menu).Filter("menu_id__in", idArr).Update(orm.Params{
+		"menu_status": status})
 }
 
 //获取用户权限列表

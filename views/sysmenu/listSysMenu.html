@@ -30,11 +30,11 @@
     {{/*</div>*/}}
     {{/*<blockquote class="layui-elem-quote">每个tr 上有两个属性 cate-id='1' 当前分类id fid='0' 父级id ,顶级分类为 0，有子分类的前面加收缩图标<i class="layui-icon x-show" status='true'>&#xe623;</i></blockquote>*/}}
     <xblock>
-        <button class="layui-btn"  lay-submit="" lay-filter="" onclick="x_admin_show('编辑','{{urlfor "SysMenuController.FormAddSysMenu"}}')"><i class="layui-icon"></i>添加菜单</button>
+        <button class="layui-btn"  lay-submit="" lay-filter="" onclick="x_admin_show('编辑','{{urlfor "SysMenuController.FormSysMenu"}}')"><i class="layui-icon"></i>添加菜单</button>
 
-        <button class="layui-btn" style="background-color: #5FB878" onclick="modifyAllMenuStatus(1)"><i class="layui-icon layui-icon-play"></i>批量开启</button>
-        <button class="layui-btn layui-bg-orange" onclick="modifyAllMenuStatus(0)"><i class="layui-icon layui-icon-pause"></i>批量关闭</button>
-        <button class="layui-btn layui-btn-danger" onclick="deleteAllSysMenu()"><i class="layui-icon layui-icon-delete"></i>批量删除</button>
+        <button class="layui-btn" style="background-color: #5FB878" onclick="modifyStatusByBatch('{{urlfor "SysMenuController.ModifySysMenuStatus"}}',1)"><i class="layui-icon layui-icon-play"></i>批量开启</button>
+        <button class="layui-btn layui-bg-orange" onclick="modifyStatusByBatch('{{urlfor "SysMenuController.ModifySysMenuStatus"}}',0)"><i class="layui-icon layui-icon-pause"></i>批量关闭</button>
+        <button class="layui-btn layui-btn-danger" onclick="deleteDataByBatch('{{urlfor "SysMenuController.DeleteSysMenu"}}')"><i class="layui-icon layui-icon-delete"></i>批量删除</button>
 
         <span class="x-right" style="line-height:40px">共有数据：{{.MenuList|len}} 条</span>
     </xblock>
@@ -97,21 +97,21 @@
                     </td>
                     <td class="td-manage">
 
-                        <button class="layui-btn layui-btn layui-btn-xs"  onclick="x_admin_show('编辑','{{urlfor "SysMenuController.FormModifySysMenu" "menu_id" $value.Id}}')" >
+                        <button class="layui-btn layui-btn layui-btn-xs"  onclick="x_admin_show('编辑','{{urlfor "SysMenuController.FormSysMenu" "menu_id" $value.Id}}')" >
                             <i class="layui-icon">&#xe642;</i>编辑
                         </button>
 
                         {{if eq $value.MenuStatus 1}}
-                            <button style="background-color: #FFB800" class="layui-btn layui-btn layui-btn-xs "  onclick="modifySysMenuStatus(this,'{{$value.Id}}','0')" >
+                            <button style="background-color: #FFB800" class="layui-btn layui-btn layui-btn-xs "  onclick="modifyStatusByOne('{{urlfor "SysMenuController.ModifySysMenuStatus"}}',this,'{{$value.Id}}','0')" >
                                 <i class="layui-icon layui-icon-pause"></i> 关闭
                             </button>
                         {{else}}
-                            <button style="background-color: #5FB878" class="layui-btn layui-btn layui-btn-xs "  onclick="modifySysMenuStatus(this,'{{$value.Id}}','1')" >
+                            <button style="background-color: #5FB878" class="layui-btn layui-btn layui-btn-xs "  onclick="modifyStatusByOne('{{urlfor "SysMenuController.ModifySysMenuStatus"}}',this,'{{$value.Id}}','1')" >
                                 <i class="layui-icon layui-icon-play"></i> 开启
                             </button>
                         {{end}}
 
-                        <button class="layui-btn-danger layui-btn layui-btn-xs"  onclick="deleteSysMenu(this,'{{$value.Id}}')" href="javascript:;" >
+                        <button class="layui-btn-danger layui-btn layui-btn-xs"  onclick="deleteDataByOne('{{urlfor "SysMenuController.DeleteSysMenu"}}',this,'{{$value.Id}}')" href="javascript:;" >
                             <i class="layui-icon">&#xe640;</i>删除
                         </button>
 
