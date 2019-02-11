@@ -1,5 +1,9 @@
 # bdemo
 
+代码迁移到了新的仓库(https://github.com/pzhen/gofox.git)
+
+bdemo 更名为 gofox
+
 1.时间比较久远了,现在传上Git上.先看下效果图.
 
 最近对代码进行了重构,增加了用户添加等功能
